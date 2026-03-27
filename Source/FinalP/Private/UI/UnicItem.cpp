@@ -28,6 +28,11 @@ UBorder* UUnicItem::GetItem()
 	return item;
 }
 
+UTextBlock* UUnicItem::GetQuantityText()
+{
+	return quantity;
+}
+
 UVerticalBox* UUnicItem::GetOptions()
 {
 	return options;
@@ -73,3 +78,10 @@ void UUnicItem::OnDropButtonPressed()
 
 	hud = nullptr;
 }
+
+/*void UUnicItem::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
+	UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+}
+*/

@@ -36,4 +36,7 @@ public:
 
 	virtual void Interact_Implementation(AActor* actor) override;
 
+	UFUNCTION()
+	void ReduceQuantity(int extract);
+
 };

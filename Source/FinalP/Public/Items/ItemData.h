@@ -16,20 +16,29 @@ struct FItemData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ID;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString name;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType type;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int quantity;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int max_quant;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* image;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* item;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	AActor* itemClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* itemClass;*/
 
 
 	

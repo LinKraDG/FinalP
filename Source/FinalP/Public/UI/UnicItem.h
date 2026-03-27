@@ -36,6 +36,9 @@ protected:
 	TObjectPtr<class UVerticalBox> options{};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<class UTextBlock> quantity;
+	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UButton> itemButton{};
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -54,6 +57,9 @@ protected:
 	UFUNCTION()
 	void OnDropButtonPressed();
 
+	//UFUNCTION()
+	//void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
 public:
 
 	UFUNCTION()
@@ -62,6 +68,9 @@ public:
 	UFUNCTION()
 	UBorder* GetItem();
 
+	UFUNCTION()
+	UTextBlock* GetQuantityText();
+	
 	UFUNCTION()
 	UVerticalBox* GetOptions();
 

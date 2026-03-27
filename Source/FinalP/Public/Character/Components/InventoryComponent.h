@@ -45,7 +45,7 @@ public:
 	int GetSize();
 	
 	UFUNCTION()
-	FHollowInfo CheckHollow();
+	FHollowInfo CheckHollow(FItemData data);
 	
 	UFUNCTION()
 	void LoadItem(FItemData item, int index);

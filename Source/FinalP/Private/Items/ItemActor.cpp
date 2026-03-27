@@ -3,6 +3,7 @@
 
 #include "Items/ItemActor.h"
 
+#include "IDetailTreeNode.h"
 #include "Character/PlayerCharacter.h"
 #include "Character/Components/InventoryComponent.h"
 #include "Components/BoxComponent.h"
@@ -34,11 +35,17 @@ void AItemActor::Interact_Implementation(AActor* actor)
 
 	player->interactiveItem = this;
 	
-	if (player->inventoryComponent->CheckHollow().isEmpty)
+	if (player->inventoryComponent->CheckHollow(itemData).isEmpty)
 	{
-		player->inventoryComponent->LoadItem(itemData, player->inventoryComponent->CheckHollow().index);
+		player->inventoryComponent->LoadItem(itemData, player->inventoryComponent->CheckHollow(itemData).index);
 	}
 		
+}
+
+void AItemActor::ReduceQuantity(int extract)
+{
+	itemData.quantity -= extract;
+	Interact_Implementation(player);
 }
 
 // Called every frame

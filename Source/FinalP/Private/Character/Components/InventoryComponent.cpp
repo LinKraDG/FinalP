@@ -6,7 +6,9 @@
 #include "Character/PlayerCharacter.h"
 #include "Components/Border.h"
 #include "Components/PanelWidget.h"
+#include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Items/ItemActor.h"
 #include "Items/ItemData.h"
 #include "UI/PlayerHUD.h"
 #include "UI/UnicItem.h"
@@ -36,7 +38,7 @@ int UInventoryComponent::GetSize()
 	return actSize;
 }
 
-FHollowInfo UInventoryComponent::CheckHollow()
+FHollowInfo UInventoryComponent::CheckHollow(FItemData data)
 {
 	
 	int voidElement = -2;
@@ -44,10 +46,20 @@ FHollowInfo UInventoryComponent::CheckHollow()
 
 	for (FItemData i  : inventoryData)
 	{
-		if (i.image == nullptr)
+		if (i.ID != NULL && i.ID == data.ID)
 		{
-			voidElement = index;
-			break;
+			if (i.quantity != i.max_quant)
+			{
+				voidElement = index;
+				break;
+			}
+		}
+		else if (i.ID == NULL)
+		{
+			if (voidElement == -2)
+			{
+				voidElement = index;
+			}
 		}
 
 		index++;
@@ -67,11 +79,42 @@ void UInventoryComponent::LoadItem(FItemData item, int index)
 {
 	if (index>=0 || index<actSize)
 	{
-		inventoryData[index] = item;
-		APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-		if (!IsValid(player)) return;
+		if (inventoryData[index].ID == NULL)
+		{
+			inventoryData[index] = item;
+			
+			APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+			if (!IsValid(player)) return;
+		
+			player->interactiveItem->Destroy();
+		}
+		else
+		{
+			if (inventoryData[index].quantity + item.quantity <= item.max_quant)
+			{
+				inventoryData[index].quantity += item.quantity;
 
-		player->interactiveItem->Destroy();
+				APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+				if (!IsValid(player)) return;
+		
+				player->interactiveItem->Destroy();
+			}
+			else
+			{
+				int oldQuantity = inventoryData[index].quantity;
+				inventoryData[index].quantity = item.max_quant;
+
+				APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+				if (!IsValid(player)) return;
+		
+				Cast<AItemActor>(player->interactiveItem)->ReduceQuantity(item.max_quant-oldQuantity);
+			}
+
+			//inventoryData[index].quantity = FMath::Clamp(item.quantity, 0, item.max_quant);
+		}
+
+		
+		
 	}
 }
 
@@ -104,7 +147,7 @@ void UInventoryComponent::PrintInventory()
 		selectedItem->SetVisibility(ESlateVisibility::Visible);
 		//selectedItem->GetFrame()->SetVisibility(ESlateVisibility::Visible);
 
-		if (selected.image == nullptr )
+		if (selected.ID == NULL )
 		{
 			selectedItem->SetNoneImage();
 			selectedItem->GetItem()->SetVisibility(ESlateVisibility::Hidden);
@@ -114,6 +157,7 @@ void UInventoryComponent::PrintInventory()
 		{
 			selectedItem->SetFrameImage();
 			selectedItem->GetItem()->SetBrushFromTexture(i.image);
+			selectedItem->GetQuantityText()->SetText(FText::AsNumber(i.quantity));
 			selectedItem->GetItem()->SetVisibility(ESlateVisibility::Visible);
 			selectedItem->GetOptions()->SetVisibility(ESlateVisibility::Hidden);
 		}
