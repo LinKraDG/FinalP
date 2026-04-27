@@ -17,7 +17,7 @@ struct FItemData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int ID;
+	int item_ID;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString name;

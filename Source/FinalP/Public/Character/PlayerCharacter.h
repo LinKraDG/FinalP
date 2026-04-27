@@ -18,16 +18,19 @@ public:
 	APlayerCharacter();
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AConstructionPart> constructionPart{};
+	TSubclassOf<class AConstructionPart> constructionPart{};
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UInventoryComponent> inventoryComponent{};
+
+	UPROPERTY(EditAnywhere, Category = Components)
+	TObjectPtr<class UConstructionComponent> constructionComponent{};
 	
 	UFUNCTION()
-	void OpenBuildMenu();
+	void OpenCloseBuildMenu();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -76,11 +79,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputMappingContext> buildMappingContext{};
 
-	UPROPERTY(EditAnywhere, Category = BuildInput)
-	TObjectPtr<class UInputAction> changeStructureAction{};
-
+	/*UPROPERTY(EditAnywhere, Category = BuildInput)
+	TObjectPtr<class UInputAction> moveStructureAction{};
+*/
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputAction> rotateStructureAction{};
+
+	//UPROPERTY(EditAnywhere, Category = BuildInput)
+	//TObjectPtr<class UInputAction> rotateStructureAction{};
 	
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputAction> placeStructureAction{};
@@ -100,20 +106,32 @@ protected:
 
 	
 	//Build Input Functions------------------------
-	void ChangeStructure();
+	void MoveStructure();
 	void RotateStructure();
+	//void RotateStructure();
 	void PlaceStructure();
 	void EndBuild();
 
 private:
-	
+	//Building internal var
+	TObjectPtr<class AConstructionPart> actBuilding{};
+	FRotator lastRotator{0,0,0};
 public:	
 	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
 	UInventoryComponent* GetInventory();
+
+	UFUNCTION()
+	UConstructionComponent* GetConstruction();
+
+	UFUNCTION()
+	void SetConstructionMode(TSubclassOf<AConstructionPart> part);
+
+	UFUNCTION()
+	void CreateStructure();
 };

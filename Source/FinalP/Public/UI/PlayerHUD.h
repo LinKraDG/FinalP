@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventoryWidget.h"
+#include "Inventory/InventoryWidget.h"
 #include "GameFramework/HUD.h"
 #include "PlayerHUD.generated.h"
 
@@ -48,4 +48,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UInventoryWidget* GetInventoryWidget();
+
+	UFUNCTION(BlueprintCallable)
+	UStructureMenuWidget* GetStructureWidget();
 };

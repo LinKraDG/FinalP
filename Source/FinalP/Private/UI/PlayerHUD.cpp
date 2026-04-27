@@ -5,7 +5,7 @@
 
 #include "ProjectGameMode.h"
 #include "UI/PlayerWidget.h"
-#include "UI/StructureMenuWidget.h"
+#include "UI/Construction/StructureMenuWidget.h"
 
 void APlayerHUD::BeginPlay()
 {
@@ -43,6 +43,7 @@ void APlayerHUD::OpenCloseConstructionMenu()
 		constructionMenuWidget->SetVisibility(ESlateVisibility::Visible);
 
 		controller->SetShowMouseCursor(true);
+		controller->SetInputMode(FInputModeGameAndUI());
 		controller->SetPause(true);
 	}
 	else
@@ -51,6 +52,7 @@ void APlayerHUD::OpenCloseConstructionMenu()
 		constructionMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 		controller->SetShowMouseCursor(false);
+		controller->SetInputMode(FInputModeGameOnly());
 		controller->SetPause(false);
 	}
 }
@@ -68,10 +70,6 @@ void APlayerHUD::OpenCloseInventory()
 		playerWidget->SetVisibility(ESlateVisibility::Collapsed);
 		inventoryWidget->SetVisibility(ESlateVisibility::Visible);
 
-		/*FInputModeUIOnly inputMode;
-		inputMode.SetWidgetToFocus(inventoryWidget->TakeWidget());
-
-		controller->SetInputMode(inputMode);*/
 		controller->SetShowMouseCursor(true);
 		controller->SetInputMode(FInputModeGameAndUI());
 		controller->SetPause(true);
@@ -81,7 +79,6 @@ void APlayerHUD::OpenCloseInventory()
 		playerWidget->SetVisibility(ESlateVisibility::Visible);
 		inventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 		
-		//controller->SetInputMode();
 		controller->SetShowMouseCursor(false);
 		controller->SetInputMode(FInputModeGameOnly());
 		controller->SetPause(false);
@@ -92,4 +89,9 @@ void APlayerHUD::OpenCloseInventory()
 UInventoryWidget* APlayerHUD::GetInventoryWidget()
 {
 	return inventoryWidget;
+}
+
+UStructureMenuWidget* APlayerHUD::GetStructureWidget()
+{
+	return constructionMenuWidget;
 }

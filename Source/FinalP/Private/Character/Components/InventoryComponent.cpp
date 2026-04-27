@@ -11,7 +11,8 @@
 #include "Items/ItemActor.h"
 #include "Items/ItemData.h"
 #include "UI/PlayerHUD.h"
-#include "UI/UnicItem.h"
+#include "UI/Inventory/InventoryWidget.h"
+#include "UI/Inventory/UnicItem.h"
 
 
 // Sets default values for this component's properties
@@ -46,7 +47,7 @@ FHollowInfo UInventoryComponent::CheckHollow(FItemData data)
 
 	for (FItemData i  : inventoryData)
 	{
-		if (i.ID != NULL && i.ID == data.ID)
+		if (i.item_ID != NULL && i.item_ID == data.item_ID)
 		{
 			if (i.quantity != i.max_quant)
 			{
@@ -54,7 +55,7 @@ FHollowInfo UInventoryComponent::CheckHollow(FItemData data)
 				break;
 			}
 		}
-		else if (i.ID == NULL)
+		else if (i.item_ID == NULL)
 		{
 			if (voidElement == -2)
 			{
@@ -79,7 +80,7 @@ void UInventoryComponent::LoadItem(FItemData item, int index)
 {
 	if (index>=0 || index<actSize)
 	{
-		if (inventoryData[index].ID == NULL)
+		if (inventoryData[index].item_ID == NULL)
 		{
 			inventoryData[index] = item;
 			
@@ -147,7 +148,7 @@ void UInventoryComponent::PrintInventory()
 		selectedItem->SetVisibility(ESlateVisibility::Visible);
 		//selectedItem->GetFrame()->SetVisibility(ESlateVisibility::Visible);
 
-		if (selected.ID == NULL )
+		if (selected.item_ID == NULL )
 		{
 			selectedItem->SetNoneImage();
 			selectedItem->GetItem()->SetVisibility(ESlateVisibility::Hidden);
