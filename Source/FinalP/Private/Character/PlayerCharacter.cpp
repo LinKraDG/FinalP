@@ -88,7 +88,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EDefaultInputComponent->BindAction(interactAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	EDefaultInputComponent->BindAction(inventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InventoryMenu);
 	//Build actions
-	EDefaultInputComponent->BindAction(rotateStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateStructure);
+	EDefaultInputComponent->BindAction(rotateLeftStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateLeftStructure);
+	EDefaultInputComponent->BindAction(rotateRightStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateRightStructure);
 	EDefaultInputComponent->BindAction(placeStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::PlaceStructure);
 	EDefaultInputComponent->BindAction(endBuildAction, ETriggerEvent::Triggered, this, &APlayerCharacter::EndBuild);
 
@@ -301,12 +302,22 @@ void APlayerCharacter::MoveStructure()
 	///////////////////////
 }
 
-void APlayerCharacter::RotateStructure()
+void APlayerCharacter::RotateLeftStructure()
 {
 	if (!IsValid(Controller)) return;
-	
+	if (!IsValid(actBuilding)) return;
 	//-------------------------------------------------------------------------
-	
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, 90, 0));
+	lastRotator = actBuilding->GetActorRotation();
+}
+
+void APlayerCharacter::RotateRightStructure()
+{
+	if (!IsValid(Controller)) return;
+	if (!IsValid(actBuilding)) return;
+	//-------------------------------------------------------------------------
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, -90, 0));
+	lastRotator = actBuilding->GetActorRotation();
 }
 
 void APlayerCharacter::PlaceStructure()
@@ -330,10 +341,10 @@ void APlayerCharacter::EndBuild()
 
 	subsystem->RemoveMappingContext(buildMappingContext);
 	UE_LOG(LogTemp, Warning, TEXT("Mapeo eliminado"));
-	if (constructionPart != NULL)
-	{
-		constructionPart = NULL;
-	}
+
+	if (constructionPart != nullptr) constructionPart = nullptr;
+	if (actBuilding != nullptr) actBuilding = nullptr;
+	
 	OpenCloseBuildMenu();
 }
 

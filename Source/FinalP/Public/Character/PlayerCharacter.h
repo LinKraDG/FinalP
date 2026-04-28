@@ -83,10 +83,10 @@ protected:
 	TObjectPtr<class UInputAction> moveStructureAction{};
 */
 	UPROPERTY(EditAnywhere, Category = BuildInput)
-	TObjectPtr<class UInputAction> rotateStructureAction{};
+	TObjectPtr<class UInputAction> rotateLeftStructureAction{};
 
-	//UPROPERTY(EditAnywhere, Category = BuildInput)
-	//TObjectPtr<class UInputAction> rotateStructureAction{};
+	UPROPERTY(EditAnywhere, Category = BuildInput)
+	TObjectPtr<class UInputAction> rotateRightStructureAction{};
 	
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputAction> placeStructureAction{};
@@ -107,8 +107,8 @@ protected:
 	
 	//Build Input Functions------------------------
 	void MoveStructure();
-	void RotateStructure();
-	//void RotateStructure();
+	void RotateLeftStructure();
+	void RotateRightStructure();
 	void PlaceStructure();
 	void EndBuild();
 
