@@ -129,6 +129,7 @@ void APlayerCharacter::CreateStructure()
 	if (!IsValid(actBuilding)) return;
 
 	actBuilding->SetTransparentMaterial();
+	actBuilding->SetActorEnableCollision(false);
 }
 
 
@@ -249,10 +250,8 @@ void APlayerCharacter::InventoryMenu()
 void APlayerCharacter::BuildMenu()
 {
 	if (!IsValid(Controller)) return;
-	if (constructionPart != NULL)
-	{
-		constructionPart = NULL;
-	}
+	if (constructionPart != nullptr) constructionPart = nullptr;
+	
 	//UE_LOG(LogTemp, Warning, TEXT("Hora de construir"));
 	APlayerController* playerController = Cast<APlayerController>(Controller);
 	
@@ -325,27 +324,37 @@ void APlayerCharacter::PlaceStructure()
 	if (!IsValid(Controller)) return;
 	if (!IsValid(actBuilding)) return;
 	actBuilding->ChangeMaterial();
+	actBuilding->SetActorEnableCollision(true);
 	CreateStructure();
 }
 
 void APlayerCharacter::EndBuild()
 {
 	if (!IsValid(Controller)) return;
+	OpenCloseBuildMenu();
+	if (actBuilding != nullptr)
+	{
+		actBuilding->Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hora de terminar de construir"));
+		APlayerController* playerController = Cast<APlayerController>(Controller);
+		if (!IsValid(playerController)) return;
+		
+		UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
+		if (!IsValid(subsystem)) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("Hora de terminar de construir"));
-	APlayerController* playerController = Cast<APlayerController>(Controller);
-	if (!IsValid(playerController)) return;
+		subsystem->RemoveMappingContext(buildMappingContext);
+		UE_LOG(LogTemp, Warning, TEXT("Mapeo eliminado"));
+	}
 
-	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
-	if (!IsValid(subsystem)) return;
-
-	subsystem->RemoveMappingContext(buildMappingContext);
-	UE_LOG(LogTemp, Warning, TEXT("Mapeo eliminado"));
-
-	if (constructionPart != nullptr) constructionPart = nullptr;
+	if (constructionPart != nullptr)
+	{
+		constructionPart = nullptr;
+	}
 	if (actBuilding != nullptr) actBuilding = nullptr;
 	
-	OpenCloseBuildMenu();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

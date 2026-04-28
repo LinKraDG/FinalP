@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AConstructionPart> actBuilding{};
+
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UInventoryComponent> inventoryComponent{};
 
@@ -114,7 +117,7 @@ protected:
 
 private:
 	//Building internal var
-	TObjectPtr<class AConstructionPart> actBuilding{};
+	
 	FRotator lastRotator{0,0,0};
 public:	
 	// Called every frame

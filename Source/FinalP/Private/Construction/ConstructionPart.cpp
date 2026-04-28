@@ -3,6 +3,8 @@
 
 #include "Construction/ConstructionPart.h"
 
+#include "Components/BoxComponent.h"
+
 // Sets default values
 AConstructionPart::AConstructionPart()
 {
@@ -10,7 +12,10 @@ AConstructionPart::AConstructionPart()
 	PrimaryActorTick.bCanEverTick = false;
 
 	baseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMeshComponent"));
-	RootComponent = baseMeshComponent;
+	boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
+	
+	RootComponent = boxCollision;
+	baseMeshComponent->SetupAttachment(RootComponent);
 }
 
 void AConstructionPart::SetTransparentMaterial()
