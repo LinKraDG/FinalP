@@ -3,6 +3,8 @@
 
 #include "Character/Components/ConstructionComponent.h"
 
+#include "EnhancedInputSubsystems.h"
+#include "Character/PlayerCharacter.h"
 #include "Components/PanelWidget.h"
 #include "Construction/ConstructionData.h"
 #include "Construction/ConstructionPart.h"
@@ -16,9 +18,10 @@ UConstructionComponent::UConstructionComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	
 }
 
 
@@ -27,6 +30,8 @@ void UConstructionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	
 	// ...
 	//TODO- mirar las estructuras
 	//TODO- Al iniciar asociar los frames del UnicStructure por el ID a la estructura
@@ -128,13 +133,95 @@ void UConstructionComponent::PrintUnlockedRecipes()
 	}
 }
 
+void UConstructionComponent::CreateStructure(const TSubclassOf<AConstructionPart>& constructionPart)
+{
+	actBuilding = GetWorld()->SpawnActor<AConstructionPart>(constructionPart, FVector(0,0,0), lastRotator);
+	if (!IsValid(actBuilding)) return;
+
+	actBuilding->SetTransparentMaterial();
+	actBuilding->SetActorEnableCollision(false);
+}
+
+void UConstructionComponent::MoveStructure()
+{
+	if (!IsValid(actBuilding)) return;
+	
+	FVector startLocation;
+	FRotator rotation;
+
+	if (!IsValid(player)) return;
+	player->GetActorEyesViewPoint(startLocation, rotation);
+
+	FVector endLocation = startLocation + (rotation.Vector() * 500.f);
+
+	FHitResult hitResult;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(player);
+	params.AddIgnoredActor(actBuilding);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
+	FVector place;
+	switch (bHit)
+	{
+	case true:
+		place = {round(hitResult.Location.X/100)*100,round(hitResult.Location.Y/100)*100,round(hitResult.Location.Z/100)*100};
+		actBuilding->SetActorLocation(place);
+		break;
+	case false:
+		place = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
+		actBuilding->SetActorLocation(place);
+		break;
+	}
+}
+
+void UConstructionComponent::RotateLeftStructure()
+{
+	
+	if (!IsValid(actBuilding)) return;
+
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, 90, 0));
+	lastRotator = actBuilding->GetActorRotation();
+}
+
+void UConstructionComponent::RotateRightStructure()
+{
+	if (!IsValid(actBuilding)) return;
+
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, -90, 0));
+	lastRotator = actBuilding->GetActorRotation();
+}
+
+void UConstructionComponent::PlaceStructure()
+{
+	if (!IsValid(actBuilding)) return;
+
+	actBuilding->ChangeMaterial();
+	actBuilding->SetActorEnableCollision(true);
+}
+
+void UConstructionComponent::EndBuild()
+{
+	if (actBuilding != nullptr)
+	{
+		actBuilding->Destroy();
+	}
+	else
+	{
+		player->ChangeToDefaultMappingContext();
+	}
+	
+	if (actBuilding != nullptr) actBuilding = nullptr;
+}
+
 
 // Called every frame
-/*void UConstructionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+void UConstructionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                            FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!IsValid(actBuilding)) return;
+	MoveStructure();
 	// ...
 }
-*/
+

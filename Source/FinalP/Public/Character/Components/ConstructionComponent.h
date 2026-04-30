@@ -27,6 +27,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDataTable> dataTable{};
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AConstructionPart> actBuilding{};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class APlayerCharacter> player{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int actLevel;
 
@@ -34,10 +40,12 @@ private:
 	FConstructionData* dataRow = nullptr;
 
 	TArray<FName> unlockedStructuresData;
+
+	FRotator lastRotator{0,0,0};
 public:
 	// Called every frame
-	/*virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;*/
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void LoadRecipes();
@@ -53,4 +61,25 @@ public:
 	
 	UFUNCTION()//debug
 	void PrintUnlockedRecipes();
+
+	//Construction functions
+
+	UFUNCTION()
+	void CreateStructure(const TSubclassOf<AConstructionPart>& constructionPart);
+
+	UFUNCTION()
+	void MoveStructure();
+	
+	UFUNCTION()
+	void RotateLeftStructure();
+	
+	UFUNCTION()
+	void RotateRightStructure();
+	
+	UFUNCTION()
+	void PlaceStructure();
+	
+	UFUNCTION()
+	void EndBuild();
+	
 };

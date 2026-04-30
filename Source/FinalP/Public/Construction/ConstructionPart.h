@@ -28,6 +28,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMaterialInterface> transparentMaterial{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UMaterialInterface> transparentBadMaterial{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMaterialInterface> originalMaterial{};
@@ -47,4 +50,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void ChangeMaterial();
+
+	UFUNCTION()
+	UBoxComponent* GetBoxCollisionComponent();
 };

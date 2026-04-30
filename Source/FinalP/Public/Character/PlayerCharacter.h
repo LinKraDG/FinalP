@@ -23,9 +23,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AConstructionPart> actBuilding{};
-
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UInventoryComponent> inventoryComponent{};
 
@@ -82,9 +79,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputMappingContext> buildMappingContext{};
 
-	/*UPROPERTY(EditAnywhere, Category = BuildInput)
-	TObjectPtr<class UInputAction> moveStructureAction{};
-*/
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputAction> rotateLeftStructureAction{};
 
@@ -109,19 +103,16 @@ protected:
 
 	
 	//Build Input Functions------------------------
-	void MoveStructure();
 	void RotateLeftStructure();
 	void RotateRightStructure();
 	void PlaceStructure();
 	void EndBuild();
 
 private:
-	//Building internal var
 	
-	FRotator lastRotator{0,0,0};
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -136,5 +127,9 @@ public:
 	void SetConstructionMode(TSubclassOf<AConstructionPart> part);
 
 	UFUNCTION()
-	void CreateStructure();
+	void ChangeToBuildMappingContext();
+
+	UFUNCTION()
+	void ChangeToDefaultMappingContext();
+	
 };

@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Character/Components/ConstructionComponent.h"
 #include "Character/Components/InventoryComponent.h"
+#include "Components/BoxComponent.h"
 #include "Construction/ConstructionPart.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Interactive.h"
@@ -19,7 +20,7 @@
 APlayerCharacter::APlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	springArm = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
@@ -118,20 +119,34 @@ void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part)
 	if (!IsValid(part)) return;
 	constructionPart = part;
 
+	constructionComponent->CreateStructure(constructionPart);
+	
 	OpenCloseBuildMenu();
 	
-	CreateStructure();
+	//CreateStructure();
 }
 
-void APlayerCharacter::CreateStructure()
+void APlayerCharacter::ChangeToBuildMappingContext()
 {
-	actBuilding = GetWorld()->SpawnActor<AConstructionPart>(constructionPart, FVector(0,0,0), lastRotator);
-	if (!IsValid(actBuilding)) return;
+	APlayerController* playerController = Cast<APlayerController>(Controller);
+	if (!IsValid(playerController)) return;
 
-	actBuilding->SetTransparentMaterial();
-	actBuilding->SetActorEnableCollision(false);
+	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
+	if (!IsValid(subsystem)) return;
+
+	subsystem->AddMappingContext(buildMappingContext, 1);
 }
 
+void APlayerCharacter::ChangeToDefaultMappingContext()
+{
+	APlayerController* playerController = Cast<APlayerController>(Controller);
+	if (!IsValid(playerController)) return;
+		
+	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
+	if (!IsValid(subsystem)) return;
+	
+	subsystem->RemoveMappingContext(buildMappingContext);
+}
 
 void APlayerCharacter::Move(const FInputActionValue& actionValue)
 {
@@ -191,7 +206,6 @@ void APlayerCharacter::OrbitalCameraChange()
 void APlayerCharacter::ZoomInCameraChange()
 {
 	if (!IsValid(Controller)) return;
-	//UE_LOG(LogTemp, Warning, TEXT("El valor es: %f"), cameraAxis);
 	
 	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength-20.f, 100.f, 1000.f);
 }
@@ -235,7 +249,6 @@ void APlayerCharacter::InventoryMenu()
 	if (!IsValid(Controller)) return;
 	
 	APlayerController* playerController = Cast<APlayerController>(Controller);
-	
 	if (!IsValid(playerController)) return;
 	
 	APlayerHUD* hud = Cast<APlayerHUD>(playerController->GetHUD());
@@ -244,6 +257,7 @@ void APlayerCharacter::InventoryMenu()
 	hud->OpenCloseInventory();
 	
 	if (!IsValid(inventoryComponent)) return;
+	
 	inventoryComponent->PrintInventory();
 }
 
@@ -252,116 +266,50 @@ void APlayerCharacter::BuildMenu()
 	if (!IsValid(Controller)) return;
 	if (constructionPart != nullptr) constructionPart = nullptr;
 	
-	//UE_LOG(LogTemp, Warning, TEXT("Hora de construir"));
-	APlayerController* playerController = Cast<APlayerController>(Controller);
+	ChangeToBuildMappingContext();
 	
-	if (!IsValid(playerController)) return;
-
-	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
-	if (!IsValid(subsystem)) return;
-
-	subsystem->AddMappingContext(buildMappingContext, 1);
-	UE_LOG(LogTemp, Warning, TEXT("Mapeo añadido"));
 	OpenCloseBuildMenu();
-}
-
-void APlayerCharacter::MoveStructure()
-{
-	if (!IsValid(Controller)) return;
-	if (!IsValid(actBuilding)) return;
-	
-	//-------------------------------------------------------------------------
-	
-	FVector startLocation;
-	FRotator rotation;
-
-	GetActorEyesViewPoint(startLocation, rotation);
-
-	FVector endLocation = startLocation + (rotation.Vector() * 600.f);
-
-	FHitResult hitResult;
-	FCollisionQueryParams params;
-	params.AddIgnoredActor(this);
-
-	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
-	FVector place;
-	switch (bHit)
-	{
-		case true:
-			
-			place = {round(hitResult.Location.X/100)*100,round(hitResult.Location.Y/100)*100,round(hitResult.Location.Z/100)*100};
-			actBuilding->SetActorLocation(place);
-			break;
-		case false:
-			place = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
-			actBuilding->SetActorLocation(FVector(hitResult.Location.X,hitResult.Location.Y,hitResult.Location.Z));
-			break;
-	}
-
-	///////////////////////
 }
 
 void APlayerCharacter::RotateLeftStructure()
 {
 	if (!IsValid(Controller)) return;
-	if (!IsValid(actBuilding)) return;
-	//-------------------------------------------------------------------------
-	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, 90, 0));
-	lastRotator = actBuilding->GetActorRotation();
+	
+	constructionComponent->RotateLeftStructure();
 }
 
 void APlayerCharacter::RotateRightStructure()
 {
 	if (!IsValid(Controller)) return;
-	if (!IsValid(actBuilding)) return;
-	//-------------------------------------------------------------------------
-	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, -90, 0));
-	lastRotator = actBuilding->GetActorRotation();
+	
+	constructionComponent->RotateRightStructure();
 }
 
 void APlayerCharacter::PlaceStructure()
 {
 	if (!IsValid(Controller)) return;
-	if (!IsValid(actBuilding)) return;
-	actBuilding->ChangeMaterial();
-	actBuilding->SetActorEnableCollision(true);
-	CreateStructure();
+	
+	constructionComponent->PlaceStructure();
+	constructionComponent->CreateStructure(constructionPart);
 }
 
 void APlayerCharacter::EndBuild()
 {
 	if (!IsValid(Controller)) return;
+
 	OpenCloseBuildMenu();
-	if (actBuilding != nullptr)
-	{
-		actBuilding->Destroy();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hora de terminar de construir"));
-		APlayerController* playerController = Cast<APlayerController>(Controller);
-		if (!IsValid(playerController)) return;
-		
-		UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
-		if (!IsValid(subsystem)) return;
-
-		subsystem->RemoveMappingContext(buildMappingContext);
-		UE_LOG(LogTemp, Warning, TEXT("Mapeo eliminado"));
-	}
-
+	
+	constructionComponent->EndBuild();
+	
 	if (constructionPart != nullptr)
 	{
 		constructionPart = nullptr;
 	}
-	if (actBuilding != nullptr) actBuilding = nullptr;
-	
 }
 
-void APlayerCharacter::Tick(float DeltaTime)
+/*void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (!IsValid(actBuilding)) return;
-	MoveStructure();
 	
 }
+*/

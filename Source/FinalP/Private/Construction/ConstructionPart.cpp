@@ -14,8 +14,10 @@ AConstructionPart::AConstructionPart()
 	baseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMeshComponent"));
 	boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
 	
-	RootComponent = boxCollision;
+	
+	//RootComponent = boxCollision;
 	baseMeshComponent->SetupAttachment(RootComponent);
+	boxCollision->SetupAttachment(baseMeshComponent);
 }
 
 void AConstructionPart::SetTransparentMaterial()
@@ -26,6 +28,11 @@ void AConstructionPart::SetTransparentMaterial()
 void AConstructionPart::ChangeMaterial()
 {
 	baseMeshComponent->SetMaterial(0, originalMaterial);
+}
+
+UBoxComponent* AConstructionPart::GetBoxCollisionComponent()
+{
+	return boxCollision;
 }
 
 // Called when the game starts or when spawned
