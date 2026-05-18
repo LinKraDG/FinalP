@@ -77,7 +77,7 @@ public:
 	void RotateRightStructure();
 	
 	UFUNCTION()
-	void PlaceStructure();
+	bool PlaceStructure();
 	
 	UFUNCTION()
 	void EndBuild();

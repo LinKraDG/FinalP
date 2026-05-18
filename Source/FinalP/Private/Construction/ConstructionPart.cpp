@@ -13,21 +13,56 @@ AConstructionPart::AConstructionPart()
 
 	baseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMeshComponent"));
 	boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
+	boxCollision->InitBoxExtent(FVector{1.f});
 	
 	
 	//RootComponent = boxCollision;
 	baseMeshComponent->SetupAttachment(RootComponent);
 	boxCollision->SetupAttachment(baseMeshComponent);
+
+	overlapCounter = 0;
+}
+
+void AConstructionPart::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	overlapCounter++;
+	validConstruct = false;
+	baseMeshComponent->SetMaterial(0, transparentBadMaterial);
+}
+
+void AConstructionPart::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	overlapCounter--;
+	if (overlapCounter == 0)
+	{
+		validConstruct = true;
+		baseMeshComponent->SetMaterial(0, transparentMaterial);
+	}
 }
 
 void AConstructionPart::SetTransparentMaterial()
 {
+	validConstruct = true;
 	baseMeshComponent->SetMaterial(0, transparentMaterial);
+	//SetActorEnableCollision(false);
+	//boxCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	//boxCollision->SetCollisionResponseToAllChannels(ECR_Overlap);
+	boxCollision->BodyInstance.SetCollisionProfileName("UnplacedStructure");
+	baseMeshComponent->BodyInstance.SetCollisionProfileName("UnplacedStructure");
+
 }
 
 void AConstructionPart::ChangeMaterial()
 {
 	baseMeshComponent->SetMaterial(0, originalMaterial);
+	
+	boxCollision->BodyInstance.SetCollisionProfileName("BlockAll");
+	baseMeshComponent->BodyInstance.SetCollisionProfileName("BlockAll");
+	
+	boxCollision->OnComponentBeginOverlap.RemoveDynamic(this, &AConstructionPart::BeginOverlap);
+	boxCollision->OnComponentEndOverlap.RemoveDynamic(this, &AConstructionPart::EndOverlap);
 }
 
 UBoxComponent* AConstructionPart::GetBoxCollisionComponent()
@@ -35,11 +70,24 @@ UBoxComponent* AConstructionPart::GetBoxCollisionComponent()
 	return boxCollision;
 }
 
+void AConstructionPart::SetPlace(FVector place)
+{
+	SetActorLocation(place);
+	//if (boxCollision->)
+}
+
+bool AConstructionPart::GetValidConstruct()
+{
+	return validConstruct;
+}
+
 // Called when the game starts or when spawned
 void AConstructionPart::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	boxCollision->OnComponentBeginOverlap.AddUniqueDynamic(this, &AConstructionPart::BeginOverlap);
+	boxCollision->OnComponentEndOverlap.AddUniqueDynamic(this, &AConstructionPart::EndOverlap);
 }
 
 // Called every frame

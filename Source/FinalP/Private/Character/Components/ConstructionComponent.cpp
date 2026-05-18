@@ -139,7 +139,6 @@ void UConstructionComponent::CreateStructure(const TSubclassOf<AConstructionPart
 	if (!IsValid(actBuilding)) return;
 
 	actBuilding->SetTransparentMaterial();
-	actBuilding->SetActorEnableCollision(false);
 }
 
 void UConstructionComponent::MoveStructure()
@@ -152,7 +151,7 @@ void UConstructionComponent::MoveStructure()
 	if (!IsValid(player)) return;
 	player->GetActorEyesViewPoint(startLocation, rotation);
 
-	FVector endLocation = startLocation + (rotation.Vector() * 500.f);
+	FVector endLocation = startLocation + (rotation.Vector() * 400.f);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
@@ -161,16 +160,17 @@ void UConstructionComponent::MoveStructure()
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
 	FVector place;
+	
 	switch (bHit)
 	{
-	case true:
-		place = {round(hitResult.Location.X/100)*100,round(hitResult.Location.Y/100)*100,round(hitResult.Location.Z/100)*100};
-		actBuilding->SetActorLocation(place);
-		break;
-	case false:
-		place = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
-		actBuilding->SetActorLocation(place);
-		break;
+		case true:
+			place = {round(hitResult.Location.X/12.8)*12.8,round(hitResult.Location.Y/12.8)*12.8,round(hitResult.Location.Z/12.8)*12.8};
+			actBuilding->SetPlace(place);
+			break;
+		case false:
+			place = {round(endLocation.X/12.8)*12.8,round(endLocation.Y/12.8)*12.8,round(endLocation.Z/12.8)*12.8};
+			actBuilding->SetPlace(place);
+			break;
 	}
 }
 
@@ -191,12 +191,15 @@ void UConstructionComponent::RotateRightStructure()
 	lastRotator = actBuilding->GetActorRotation();
 }
 
-void UConstructionComponent::PlaceStructure()
+bool UConstructionComponent::PlaceStructure()
 {
-	if (!IsValid(actBuilding)) return;
-
+	if (!IsValid(actBuilding)) return false;
+	if (!actBuilding->GetValidConstruct()) return false;
+	
 	actBuilding->ChangeMaterial();
-	actBuilding->SetActorEnableCollision(true);
+	
+	return true;
+	//actBuilding->SetActorEnableCollision(true);
 }
 
 void UConstructionComponent::EndBuild()

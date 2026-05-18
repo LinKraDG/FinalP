@@ -18,6 +18,9 @@ public:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	//FConstructionData structureData{};
+private:
+	bool validConstruct;
+	int overlapCounter;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -37,6 +40,12 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UStaticMeshComponent> baseMeshComponent{};
+
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 public:	
 	// Called every frame
@@ -53,4 +62,10 @@ public:
 
 	UFUNCTION()
 	UBoxComponent* GetBoxCollisionComponent();
+
+	UFUNCTION()
+	void SetPlace(FVector place);
+
+	UFUNCTION()
+	bool GetValidConstruct();
 };
