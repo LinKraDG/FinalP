@@ -33,8 +33,6 @@ void UConstructionComponent::BeginPlay()
 	player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	
 	// ...
-	//TODO- mirar las estructuras
-	//TODO- Al iniciar asociar los frames del UnicStructure por el ID a la estructura
 	if (!IsValid(dataTable)) return;
 
 	//Load unlocked recipes
@@ -133,12 +131,36 @@ void UConstructionComponent::PrintUnlockedRecipes()
 	}
 }
 
-void UConstructionComponent::CreateStructure(const TSubclassOf<AConstructionPart>& constructionPart)
+void UConstructionComponent::CreateStructure(TSubclassOf<AConstructionPart>& constructionPart)
 {
-	actBuilding = GetWorld()->SpawnActor<AConstructionPart>(constructionPart, FVector(0,0,0), lastRotator);
-	if (!IsValid(actBuilding)) return;
+	if (!IsValid(constructionPart)) return;
 
-	actBuilding->SetTransparentMaterial();
+	if (actSelectedPart==nullptr || actSelectedPart!= constructionPart)
+	{
+		actSelectedPart = constructionPart;
+	}
+
+	CreateGhost();
+	
+	//actBuilding->SetTransparentMaterial();
+}
+
+void UConstructionComponent::CreateGhost()
+{
+	previewMesh = NewObject<UStaticMeshComponent>(player, UStaticMeshComponent::StaticClass(), "PreviewMesh");
+
+	if (!IsValid(previewMesh)) return;
+
+	previewMesh->RegisterComponent();
+	previewMesh->AttachToComponent(player->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
+	previewMesh->CreationMethod = EComponentCreationMethod::Instance;
+	previewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+////
+	actBuilding = GetWorld()->SpawnActor<AConstructionPart>(actSelectedPart, {0.f,0.f,0.f}, structureRotator);
+	actBuilding->SetActorHiddenInGame(true);
+	
+	previewMesh->SetStaticMesh(actBuilding->GetStructureMesh()->GetStaticMesh());
+	//previewMesh->SetMaterial(0,transparentMaterial);
 }
 
 void UConstructionComponent::MoveStructure()
@@ -159,17 +181,73 @@ void UConstructionComponent::MoveStructure()
 	params.AddIgnoredActor(actBuilding);
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
-	FVector place;
 	
 	switch (bHit)
 	{
 		case true:
-			place = {round(hitResult.Location.X/12.8)*12.8,round(hitResult.Location.Y/12.8)*12.8,round(hitResult.Location.Z/12.8)*12.8};
-			actBuilding->SetPlace(place);
+			structurePlace = {round(hitResult.Location.X/100.f)*100.f,round(hitResult.Location.Y/100.f)*100.f,round(hitResult.Location.Z/100.f)*100.f};
+			previewMesh->SetWorldTransform(FTransform(structureRotator,structurePlace,{1.f,1.f,1.f}));
+			AvailableColor(CheckOverlap());
 			break;
 		case false:
-			place = {round(endLocation.X/12.8)*12.8,round(endLocation.Y/12.8)*12.8,round(endLocation.Z/12.8)*12.8};
-			actBuilding->SetPlace(place);
+			structurePlace = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
+			previewMesh->SetWorldTransform(FTransform(structureRotator,structurePlace,{1.f,1.f,1.f}));
+		AvailableColor(CheckOverlap());
+
+			//AvailableColor(true);
+			break;
+	}
+}
+
+bool UConstructionComponent::CheckOverlap()
+{
+	UWorld* World = GetWorld();
+	if (!World || !previewMesh)
+	{
+		return false;
+	}
+
+	FVector Location = previewMesh->Bounds.Origin;;
+	FQuat Rotation = previewMesh->GetComponentQuat();
+
+	FVector origin;
+	FVector extent;
+
+	previewMesh->GetLocalBounds(origin, extent);
+
+	extent *= 0.25f;
+
+	FHitResult Hit;
+
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(player);
+
+	bool bHit = !World->SweepSingleByChannel(Hit, Location, Location, Rotation, ECC_WorldStatic,	FCollisionShape::MakeBox(extent), params);
+
+	DrawDebugBox(
+	GetWorld(),
+	Location,
+	extent,
+	Rotation,
+	bHit ? FColor::Red : FColor::Green,
+	false,
+	0.0f,
+	0,
+	2.0f
+);
+	return bHit;
+}
+
+void UConstructionComponent::AvailableColor(bool canBuild)
+{
+	buildable = canBuild;
+	switch (canBuild)
+	{
+		case true:
+			previewMesh->SetMaterial(0, transparentMaterial);
+			break;
+		case false:
+			previewMesh->SetMaterial(0, transparentBadMaterial);
 			break;
 	}
 }
@@ -179,27 +257,34 @@ void UConstructionComponent::RotateLeftStructure()
 	
 	if (!IsValid(actBuilding)) return;
 
-	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, 90, 0));
-	lastRotator = actBuilding->GetActorRotation();
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, 15, 0));
+	structureRotator = actBuilding->GetActorRotation();
 }
 
 void UConstructionComponent::RotateRightStructure()
 {
 	if (!IsValid(actBuilding)) return;
 
-	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, -90, 0));
-	lastRotator = actBuilding->GetActorRotation();
+	actBuilding->SetActorRotation(actBuilding->GetActorRotation()+FRotator(0, -15, 0));
+	structureRotator = actBuilding->GetActorRotation();
 }
 
-bool UConstructionComponent::PlaceStructure()
+void UConstructionComponent::PlaceStructure()
 {
-	if (!IsValid(actBuilding)) return false;
-	if (!actBuilding->GetValidConstruct()) return false;
+	if (!IsValid(actBuilding)) return;
+	//if (!actBuilding->GetValidConstruct()) return;
+	if (!buildable) return;
+
+	previewMesh->DestroyComponent();
+
+	actBuilding->SetActorRotation(structureRotator);
+	actBuilding->SetActorLocation(structurePlace);
+	actBuilding->SetActorHiddenInGame(false);
+	actBuilding->SetActorEnableCollision(true);
+	actBuilding->ChangeColl();
 	
-	actBuilding->ChangeMaterial();
-	
-	return true;
-	//actBuilding->SetActorEnableCollision(true);
+	actBuilding = nullptr;
+	CreateGhost();
 }
 
 void UConstructionComponent::EndBuild()
@@ -207,6 +292,7 @@ void UConstructionComponent::EndBuild()
 	if (actBuilding != nullptr)
 	{
 		actBuilding->Destroy();
+		previewMesh->DestroyComponent();
 	}
 	else
 	{

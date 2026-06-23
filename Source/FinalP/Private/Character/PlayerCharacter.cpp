@@ -289,9 +289,9 @@ void APlayerCharacter::PlaceStructure()
 {
 	if (!IsValid(Controller)) return;
 
-	if (!constructionComponent->PlaceStructure()) return;
+	constructionComponent->PlaceStructure();
 	
-	constructionComponent->CreateStructure(constructionPart);
+	//constructionComponent->CreateStructure();
 }
 
 void APlayerCharacter::EndBuild()
