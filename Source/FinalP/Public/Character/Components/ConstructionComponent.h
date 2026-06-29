@@ -23,6 +23,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EStructureType defaultType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMaterialInterface> transparentMaterial{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -76,6 +79,7 @@ public:
 
 	UFUNCTION()
 	void UpdateRecipeSlots();
+	void UpdateFilterRecipeSlots(EStructureType type);
 	
 	UFUNCTION()//debug
 	void PrintUnlockedRecipes();

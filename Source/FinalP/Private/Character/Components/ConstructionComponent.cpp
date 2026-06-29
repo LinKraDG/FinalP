@@ -118,7 +118,15 @@ void UConstructionComponent::PrintBPsInventory()
 void UConstructionComponent::UpdateRecipeSlots()
 {
 	APlayerHUD* hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	hud->GetStructureWidget()->SlotCreation(dataTable, unlockedStructuresData);
+	hud->GetStructureWidget()->RemoveSlots();
+	hud->GetStructureWidget()->SlotCreation(dataTable, unlockedStructuresData, defaultType);
+}
+
+void UConstructionComponent::UpdateFilterRecipeSlots(EStructureType type)
+{
+	APlayerHUD* hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	hud->GetStructureWidget()->RemoveSlots();
+	hud->GetStructureWidget()->SlotCreation(dataTable, unlockedStructuresData, type);
 }
 
 //Debug
@@ -155,12 +163,11 @@ void UConstructionComponent::CreateGhost()
 	previewMesh->AttachToComponent(player->GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 	previewMesh->CreationMethod = EComponentCreationMethod::Instance;
 	previewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-////
+
 	actBuilding = GetWorld()->SpawnActor<AConstructionPart>(actSelectedPart, {0.f,0.f,0.f}, structureRotator);
 	actBuilding->SetActorHiddenInGame(true);
 	
 	previewMesh->SetStaticMesh(actBuilding->GetStructureMesh()->GetStaticMesh());
-	//previewMesh->SetMaterial(0,transparentMaterial);
 }
 
 void UConstructionComponent::MoveStructure()
@@ -192,9 +199,7 @@ void UConstructionComponent::MoveStructure()
 		case false:
 			structurePlace = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
 			previewMesh->SetWorldTransform(FTransform(structureRotator,structurePlace,{1.f,1.f,1.f}));
-		AvailableColor(CheckOverlap());
-
-			//AvailableColor(true);
+			AvailableColor(CheckOverlap());
 			break;
 	}
 }
@@ -222,7 +227,7 @@ bool UConstructionComponent::CheckOverlap()
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(player);
 
-	bool bHit = !World->SweepSingleByChannel(Hit, Location, Location, Rotation, ECC_WorldStatic,	FCollisionShape::MakeBox(extent), params);
+	bool bHit = !World->SweepSingleByChannel(Hit, Location, Location, Rotation, ECC_WorldStatic, FCollisionShape::MakeBox(extent), params);
 
 	DrawDebugBox(
 	GetWorld(),

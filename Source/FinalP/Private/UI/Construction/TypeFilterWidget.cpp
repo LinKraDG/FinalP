@@ -3,6 +3,8 @@
 
 #include "UI/Construction/TypeFilterWidget.h"
 
+#include "Character/PlayerCharacter.h"
+#include "Character/Components/ConstructionComponent.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 
@@ -17,11 +19,18 @@ void UTypeFilterWidget::NativeOnInitialized()
 //Filter by the type of the structures
 void UTypeFilterWidget::OnFilterButtonPressed()
 {
+	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	if (!IsValid(player)) return;
 	
+	UConstructionComponent* constructionComponent = player->GetConstruction();
+	if (!IsValid(constructionComponent)) return;
+	
+	constructionComponent->UpdateFilterRecipeSlots(type);
 }
 
 void UTypeFilterWidget::SetFrameText()
 {
 	typeTextFrame->SetText(textTypeFrame);
+	typeText->SetText(textType);
 }
 
