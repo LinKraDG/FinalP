@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "GameFramework/Actor.h"
 #include "ConstructionPart.generated.h"
 

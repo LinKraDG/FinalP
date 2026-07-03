@@ -12,7 +12,7 @@ enum class EItemType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FItemData
+struct FItemData : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -24,9 +24,6 @@ struct FItemData
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType type;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int quantity;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int max_quant;
@@ -39,8 +36,5 @@ struct FItemData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* itemClass;*/
-
-
-	
 	
 };

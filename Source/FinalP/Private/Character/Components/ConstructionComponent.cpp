@@ -6,7 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Character/PlayerCharacter.h"
 #include "Components/PanelWidget.h"
-#include "Construction/ConstructionData.h"
+//#include "Structs/ConstructionData.h"
 #include "Construction/ConstructionPart.h"
 #include "UI/PlayerHUD.h"
 #include "UI/Construction/StructureMenuWidget.h"

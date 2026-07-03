@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Construction/ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "Math/TransformCalculus3D.h"
 #include "ConstructionComponent.generated.h"
 

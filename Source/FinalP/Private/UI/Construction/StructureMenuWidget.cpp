@@ -10,7 +10,7 @@
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
-#include "Construction/ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "Construction/ConstructionPart.h"
 #include "UI/Construction/UnicStructure.h"
 

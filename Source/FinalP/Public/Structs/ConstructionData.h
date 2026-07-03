@@ -1,5 +1,6 @@
 ﻿#pragma once
 //#include "StructUtils/InstancedStruct.h"
+#include "CraftIngredient.h"
 #include "Enums/StructuresClassify.h"
 
 #include "ConstructionData.generated.h"
@@ -25,7 +26,7 @@ struct FConstructionData : public FTableRowBase
 	int unlockLevel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<TSoftClassPtr<class AItemActor>, int> craftIngredients;
+	TArray<FCraftIngredient> craftIngredients;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class AConstructionPart> structure{};

@@ -8,7 +8,9 @@
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/UniformGridPanel.h"
 #include "Construction/ConstructionPart.h"
+#include "UI/Construction/BlueprintIngredientWidget.h"
 
 void USelectionDataWidget::NativeOnInitialized()
 {
@@ -36,5 +38,18 @@ void USelectionDataWidget::SelectStructure(FConstructionData structureData)
 	descriptionText->SetText(FText::FromString(structureData.desciption));
 
 	buildButton->SetVisibility(ESlateVisibility::Visible);
+	//Foreach para cada material necesario y crear lineas para cada material
+	for (FCraftIngredient itemIngredient : structureData.craftIngredients)
+	{
+		CreateIngredientSlot(/*itemIngredient*/);
+	}
 	//TODO-- Hacer que el boton de construir se ilumine cuando se posean todos los ingredientes
+}
+
+void USelectionDataWidget::CreateIngredientSlot()
+{
+	UBlueprintIngredientWidget* newStructureCost = CreateWidget<UBlueprintIngredientWidget>(GetWorld(), costWidget);
+	//newStructureCost->SetData()
+	Cast<UUniformGridPanel>(structureCostPanel)->AddChildToUniformGrid(newStructureCost, 0, structureCostPanel->GetAllChildren().Num());
+
 }
