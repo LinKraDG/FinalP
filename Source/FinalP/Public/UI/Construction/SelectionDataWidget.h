@@ -26,10 +26,14 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> descriptionText{};
 
-	//AQUI EL COSTE
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<class UPanelWidget> structureCostPanel{};
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UButton> buildButton{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UBlueprintIngredientWidget> costWidget;
 
 	//Buttons functions
 	UFUNCTION()
@@ -42,4 +46,7 @@ protected:
 public:
 	UFUNCTION()
 	void SelectStructure(FConstructionData structureData);
+
+	UFUNCTION()
+	void CreateIngredientSlot();
 };

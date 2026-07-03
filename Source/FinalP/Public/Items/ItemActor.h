@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/ItemData.h"
+#include "Structs/ItemData.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Interactive.h"
 #include "ItemActor.generated.h"
@@ -29,6 +29,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class APlayerCharacter> player{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int quantity;
 	
 public:
 	// Called every frame

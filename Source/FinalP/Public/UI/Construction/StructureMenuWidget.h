@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Enums/StructuresClassify.h"
 #include "StructureMenuWidget.generated.h"
 
 /**
@@ -40,10 +41,13 @@ public:
 	UPanelWidget* GetStructurePanel();
 
 	UFUNCTION()
-	void SlotCreation(UDataTable* table, TArray<FName> names);
+	void SlotCreation(UDataTable* table, TArray<FName> names, EStructureType type = EStructureType::None);
 
 	UFUNCTION()
 	void CreateStructureSlot(FName row);
+
+	UFUNCTION()
+	void RemoveSlots();
 
 	UFUNCTION()
 	USelectionDataWidget* GetSelectionWidget();

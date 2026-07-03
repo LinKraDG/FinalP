@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Construction/ConstructionData.h"
+#include "Structs/ConstructionData.h"
+#include "Math/TransformCalculus3D.h"
 #include "ConstructionComponent.generated.h"
 
 
@@ -22,6 +23,15 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EStructureType defaultType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UMaterialInterface> transparentMaterial{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UMaterialInterface> transparentBadMaterial{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FConstructionData> structureData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -31,17 +41,28 @@ protected:
 	TObjectPtr<class AConstructionPart> actBuilding{};
 
 	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UStaticMeshComponent> previewMesh{};
+
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class APlayerCharacter> player{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int actLevel;
 
+	UPROPERTY(EditAnywhere)
+	bool buildable;
+	
 private:
 	FConstructionData* dataRow = nullptr;
 
-	TArray<FName> unlockedStructuresData;
+	TSubclassOf<AConstructionPart> actSelectedPart;
 
-	FRotator lastRotator{0,0,0};
+	TArray<FName> unlockedStructuresData;
+	
+	FVector structurePlace;
+
+	FRotator structureRotator{0,0,0};
+	
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -58,6 +79,7 @@ public:
 
 	UFUNCTION()
 	void UpdateRecipeSlots();
+	void UpdateFilterRecipeSlots(EStructureType type);
 	
 	UFUNCTION()//debug
 	void PrintUnlockedRecipes();
@@ -65,10 +87,19 @@ public:
 	//Construction functions
 
 	UFUNCTION()
-	void CreateStructure(const TSubclassOf<AConstructionPart>& constructionPart);
+	void CreateStructure(TSubclassOf<AConstructionPart>& constructionPart);
+
+	UFUNCTION()
+	void CreateGhost();
 
 	UFUNCTION()
 	void MoveStructure();
+
+	UFUNCTION()
+	bool CheckOverlap();
+
+	UFUNCTION()
+	void AvailableColor(bool canBuild);
 	
 	UFUNCTION()
 	void RotateLeftStructure();
@@ -77,7 +108,7 @@ public:
 	void RotateRightStructure();
 	
 	UFUNCTION()
-	bool PlaceStructure();
+	void PlaceStructure();
 	
 	UFUNCTION()
 	void EndBuild();

@@ -8,7 +8,7 @@
 #include "Character/Components/InventoryComponent.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
-#include "Items/ItemData.h"
+#include "Structs/ItemData.h"
 #include "UI/PlayerHUD.h"
 
 void UUnicItem::NativeOnInitialized()

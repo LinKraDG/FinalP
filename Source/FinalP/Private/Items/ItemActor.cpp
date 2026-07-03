@@ -35,16 +35,13 @@ void AItemActor::Interact_Implementation(AActor* actor)
 
 	player->interactiveItem = this;
 	
-	if (player->inventoryComponent->CheckHollow(itemData).isEmpty)
-	{
-		player->inventoryComponent->LoadItem(itemData, player->inventoryComponent->CheckHollow(itemData).index);
-	}
+	player->inventoryComponent->LoadItem(itemData, quantity);
 		
 }
 
 void AItemActor::ReduceQuantity(int extract)
 {
-	itemData.quantity -= extract;
+	quantity -= extract;
 	Interact_Implementation(player);
 }
 

@@ -9,7 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Items/ItemActor.h"
-#include "Items/ItemData.h"
+//#include "Structs/ItemData.h"
 #include "UI/PlayerHUD.h"
 #include "UI/Inventory/InventoryWidget.h"
 #include "UI/Inventory/UnicItem.h"
@@ -30,7 +30,11 @@ UInventoryComponent::UInventoryComponent()
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	inventoryData.Reserve(actSize);
+	for (int i = 0; i < actSize; i++)
+	{
+		inventoryData.Add(i,FInventoryItem(-1,0));
+	}
 	// ...
 }
 
@@ -39,95 +43,62 @@ int UInventoryComponent::GetSize()
 	return actSize;
 }
 
-FHollowInfo UInventoryComponent::CheckHollow(FItemData data)
+void UInventoryComponent::LoadItem(FItemData item, int amount)
 {
-	
-	int voidElement = -2;
-	int index = 0;
-
-	for (FItemData i  : inventoryData)
+	int index = -1;
+	for (const TPair<int, FInventoryItem>& pair : inventoryData)
 	{
-		if (i.item_ID != NULL && i.item_ID == data.item_ID)
+		if (pair.Value.ItemID == item.item_ID)
 		{
-			if (i.quantity != i.max_quant)
-			{
-				voidElement = index;
-				break;
-			}
+			index = pair.Key;
+			break;
 		}
-		else if (i.item_ID == NULL)
-		{
-			if (voidElement == -2)
-			{
-				voidElement = index;
-			}
-		}
-
-		index++;
 	}
 	
-	if (voidElement == -2)
+	if (index != -1)
 	{
-		return FHollowInfo(false, voidElement);
+		//Act exist at inventory
+		FInventoryItem* IItem = inventoryData.Find(index);
+		IItem->Amount += amount;
+
+		NotifyChanges(*IItem);
 	}
 	else
 	{
-		return FHollowInfo(true, voidElement);
+		//Not at inventory yet
+		FInventoryItem NewItem;
+
+		NewItem.ItemID = item.item_ID;
+		NewItem.Amount = amount;
+
+		for (const TPair<int, FInventoryItem>& pair : inventoryData)
+		{
+			if (pair.Value.ItemID == -1)
+			{
+				inventoryData[pair.Key] = NewItem;
+				break;
+			}
+		}
+
+		NotifyChanges(NewItem);
 	}
 }
 
-void UInventoryComponent::LoadItem(FItemData item, int index)
+void UInventoryComponent::UnloadItem(FItemData item, int amount)
 {
-	if (index>=0 || index<actSize)
-	{
-		if (inventoryData[index].item_ID == NULL)
-		{
-			inventoryData[index] = item;
-			
-			APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-			if (!IsValid(player)) return;
-		
-			player->interactiveItem->Destroy();
-		}
-		else
-		{
-			if (inventoryData[index].quantity + item.quantity <= item.max_quant)
-			{
-				inventoryData[index].quantity += item.quantity;
-
-				APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-				if (!IsValid(player)) return;
-		
-				player->interactiveItem->Destroy();
-			}
-			else
-			{
-				int oldQuantity = inventoryData[index].quantity;
-				inventoryData[index].quantity = item.max_quant;
-
-				APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-				if (!IsValid(player)) return;
-		
-				Cast<AItemActor>(player->interactiveItem)->ReduceQuantity(item.max_quant-oldQuantity);
-			}
-
-			//inventoryData[index].quantity = FMath::Clamp(item.quantity, 0, item.max_quant);
-		}
-
-		
-		
-	}
-}
-
-void UInventoryComponent::UnloadItem(FItemData item, int index)
-{
-	FItemData leadedItem = item;
-	inventoryData[index] = FItemData();
+	FInventoryItem* IItem = inventoryData.Find(item.item_ID);
+	FInventoryItem removed = *IItem;
+	removed.Amount = 0;
+	inventoryData.Remove(item.item_ID);
+	NotifyChanges(removed);
 }
 
 FItemData UInventoryComponent::GetItem(int index)
 {
-	return inventoryData[index];
+	TArray<FInventoryItem> vals;
+	inventoryData.GenerateValueArray(vals);
+	const FItemData* Row = itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(vals[index].ItemID)),TEXT("InventoryLookup"));
+	return FItemData(*Row);
 }
 
 void UInventoryComponent::PrintInventory()
@@ -136,19 +107,29 @@ void UInventoryComponent::PrintInventory()
 	UPanelWidget* panel = Cast<UPanelWidget>(hud->GetInventoryWidget()->GetItemsPanel());
 	UUnicItem* selectedItem = nullptr;
 	int index = 0;
-	
-	for (FItemData i : inventoryData)
+
+	for (const TPair<int, FInventoryItem>& pair : inventoryData)
 	{
 		if (index>actSize) break;
 
-		FItemData selected = i;
+		const FItemData* Row = nullptr; //= itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(pair.Value.ItemID)),TEXT("InventoryLookup"));
+
+		for (auto& Element : itemDataTable->GetRowMap())
+		{
+			FItemData* actRow = (FItemData*)(Element.Value);
+			if (actRow && actRow->item_ID == pair.Value.ItemID)
+			{
+				Row = actRow;
+				break;
+			}
+		}
+		
 		int inventoryCount = index;
 		
 		selectedItem = Cast<UUnicItem>(panel->GetChildAt(inventoryCount));
 		selectedItem->SetVisibility(ESlateVisibility::Visible);
-		//selectedItem->GetFrame()->SetVisibility(ESlateVisibility::Visible);
 
-		if (selected.item_ID == NULL )
+		if (Row == nullptr )
 		{
 			selectedItem->SetNoneImage();
 			selectedItem->GetItem()->SetVisibility(ESlateVisibility::Hidden);
@@ -157,14 +138,20 @@ void UInventoryComponent::PrintInventory()
 		else
 		{
 			selectedItem->SetFrameImage();
-			selectedItem->GetItem()->SetBrushFromTexture(i.image);
-			selectedItem->GetQuantityText()->SetText(FText::AsNumber(i.quantity));
+			selectedItem->GetItem()->SetBrushFromTexture(Row->image);
+			selectedItem->GetQuantityText()->SetText(FText::AsNumber(pair.Value.Amount));
 			selectedItem->GetItem()->SetVisibility(ESlateVisibility::Visible);
 			selectedItem->GetOptions()->SetVisibility(ESlateVisibility::Hidden);
 		}
 		
 		index++;
 	}
+}
+
+void UInventoryComponent::NotifyChanges(FInventoryItem item)
+{
+	OnItemAmountChanged.Broadcast(item);
+	OnInventoryUpdated.Broadcast();
 }
 
 

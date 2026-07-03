@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "GameFramework/Actor.h"
 #include "ConstructionPart.generated.h"
 
@@ -29,11 +29,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBoxComponent> boxCollision{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UMaterialInterface> transparentMaterial{};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UMaterialInterface> transparentBadMaterial{};
+	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMaterialInterface> originalMaterial{};
@@ -58,7 +54,7 @@ public:
 	void SetTransparentMaterial();
 	
 	UFUNCTION(BlueprintCallable)
-	void ChangeMaterial();
+	void ChangeColl();
 
 	UFUNCTION()
 	UBoxComponent* GetBoxCollisionComponent();
@@ -68,4 +64,7 @@ public:
 
 	UFUNCTION()
 	bool GetValidConstruct();
+
+	UFUNCTION()
+	UStaticMeshComponent* GetStructureMesh();
 };
