@@ -114,12 +114,12 @@ UConstructionComponent* APlayerCharacter::GetConstruction()
 	return constructionComponent;
 }
 
-void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part)
+void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int,int> cost)
 {
 	if (!IsValid(part)) return;
 	constructionPart = part;
 
-	constructionComponent->CreateStructure(constructionPart);
+	constructionComponent->CreateStructure(constructionPart, cost);
 	
 	OpenCloseBuildMenu();
 	
@@ -146,6 +146,11 @@ void APlayerCharacter::ChangeToDefaultMappingContext()
 	if (!IsValid(subsystem)) return;
 	
 	subsystem->RemoveMappingContext(buildMappingContext);
+}
+
+void APlayerCharacter::NoMoreMaterial()
+{
+	EndBuild();
 }
 
 void APlayerCharacter::Move(const FInputActionValue& actionValue)

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Structs/CraftIngredient.h"
+#include "Structs/InventoryItem.h"
 #include "SelectionDataWidget.generated.h"
 
 /**
@@ -14,6 +16,14 @@ class FINALP_API USelectionDataWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UInventoryComponent> inventory{};
+	
+	void Refresh();
+
+	void OnInventoryItemChanged(FInventoryItem Item);
+	
 protected:
 	virtual void NativeOnInitialized() override;
 
@@ -48,5 +58,11 @@ public:
 	void SelectStructure(FConstructionData structureData);
 
 	UFUNCTION()
-	void CreateIngredientSlot();
+	void CreateIngredientSlot(FCraftIngredient ingredient);
+
+	UFUNCTION()
+	void RemoveSlots();
+
+	UFUNCTION()
+	bool CheckHasMaterials();
 };

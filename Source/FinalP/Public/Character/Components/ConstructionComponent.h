@@ -62,6 +62,8 @@ private:
 	FVector structurePlace;
 
 	FRotator structureRotator{0,0,0};
+
+	TMap<int/*itemID*/, int/*amount*/> actStructureCost;
 	
 public:
 	// Called every frame
@@ -87,7 +89,7 @@ public:
 	//Construction functions
 
 	UFUNCTION()
-	void CreateStructure(TSubclassOf<AConstructionPart>& constructionPart);
+	void CreateStructure(TSubclassOf<AConstructionPart>& constructionPart, TMap<int, int> cost);
 
 	UFUNCTION()
 	void CreateGhost();

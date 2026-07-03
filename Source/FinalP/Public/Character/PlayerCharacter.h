@@ -124,12 +124,15 @@ public:
 	UConstructionComponent* GetConstruction();
 
 	UFUNCTION()
-	void SetConstructionMode(TSubclassOf<AConstructionPart> part);
+	void SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int, int> cost);
 
 	UFUNCTION()
 	void ChangeToBuildMappingContext();
 
 	UFUNCTION()
 	void ChangeToDefaultMappingContext();
+
+	UFUNCTION()
+	void NoMoreMaterial();
 	
 };
