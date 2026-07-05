@@ -43,12 +43,12 @@ int UInventoryComponent::GetSize()
 	return actSize;
 }
 
-void UInventoryComponent::LoadItem(FItemData item, int amount)
+void UInventoryComponent::LoadItem(int ID, int amount)
 {
 	int index = -1;
 	for (const TPair<int, FInventoryItem>& pair : inventoryData)
 	{
-		if (pair.Value.ItemID == item.item_ID)
+		if (pair.Value.ItemID == ID)
 		{
 			index = pair.Key;
 			break;
@@ -68,7 +68,7 @@ void UInventoryComponent::LoadItem(FItemData item, int amount)
 		//Not at inventory yet
 		FInventoryItem NewItem;
 
-		NewItem.ItemID = item.item_ID;
+		NewItem.ItemID = ID;
 		NewItem.Amount = amount;
 
 		for (const TPair<int, FInventoryItem>& pair : inventoryData)
@@ -93,12 +93,67 @@ void UInventoryComponent::UnloadItem(FItemData item, int amount)
 	NotifyChanges(removed);
 }
 
+bool UInventoryComponent::RemoveItem(int itemID, int amount)
+{
+
+	if (amount <= 0) return false;
+
+	FInventoryItem* item = nullptr;
+	//FInventoryItem* Item = inventoryData.Find(itemID);
+
+	
+	for (TPair<int, FInventoryItem>& pair : inventoryData)
+	{
+		if (pair.Value.ItemID == itemID)
+		{
+			item = &pair.Value;
+			break;
+		}
+	}
+
+	if (!item) return false;
+	
+	if (item->Amount < amount) return false;
+
+	item->Amount -= amount;
+
+	if (item->Amount == 0)
+	{
+		FInventoryItem Removed = *item;
+
+		Removed.Amount = 0;
+
+		inventoryData.Remove(itemID);
+		
+		OnItemAmountChanged.Broadcast(Removed);
+
+		return false;
+	}
+	else
+	{
+		OnItemAmountChanged.Broadcast(*item);
+	}
+	return true;
+}
+
 FItemData UInventoryComponent::GetItem(int index)
 {
 	TArray<FInventoryItem> vals;
 	inventoryData.GenerateValueArray(vals);
 	const FItemData* Row = itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(vals[index].ItemID)),TEXT("InventoryLookup"));
 	return FItemData(*Row);
+}
+
+int UInventoryComponent::GetItemAmount(int ID)
+{
+	for (const TPair<int, FInventoryItem>& pair : inventoryData)
+	{
+		if (pair.Value.ItemID == ID)
+		{
+			return pair.Value.Amount;
+		}
+	}
+	return 0;
 }
 
 void UInventoryComponent::PrintInventory()
@@ -112,7 +167,7 @@ void UInventoryComponent::PrintInventory()
 	{
 		if (index>actSize) break;
 
-		const FItemData* Row = nullptr; //= itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(pair.Value.ItemID)),TEXT("InventoryLookup"));
+		const FItemData* Row = nullptr;
 
 		for (auto& Element : itemDataTable->GetRowMap())
 		{

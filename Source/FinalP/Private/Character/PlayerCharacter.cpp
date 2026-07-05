@@ -48,6 +48,19 @@ void APlayerCharacter::OpenCloseBuildMenu()
 	hud->OpenCloseConstructionMenu();
 }
 
+void APlayerCharacter::PauseGame()
+{
+	if (!IsValid(Controller)) return;
+	
+	APlayerController* playerController = Cast<APlayerController>(Controller);
+	if (!IsValid(playerController)) return;
+	
+	APlayerHUD* hud = Cast<APlayerHUD>(playerController->GetHUD());
+	if (!IsValid(hud)) return;
+
+	hud->OpenClosePauseMenu();
+}
+
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
@@ -88,6 +101,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EDefaultInputComponent->BindAction(buildAction, ETriggerEvent::Triggered, this, &APlayerCharacter::BuildMenu);
 	EDefaultInputComponent->BindAction(interactAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 	EDefaultInputComponent->BindAction(inventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::InventoryMenu);
+	EDefaultInputComponent->BindAction(pauseAction, ETriggerEvent::Triggered, this, &APlayerCharacter::PauseMenu);
 	//Build actions
 	EDefaultInputComponent->BindAction(rotateLeftStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateLeftStructure);
 	EDefaultInputComponent->BindAction(rotateRightStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateRightStructure);
@@ -114,12 +128,12 @@ UConstructionComponent* APlayerCharacter::GetConstruction()
 	return constructionComponent;
 }
 
-void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part)
+void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int,int> cost)
 {
 	if (!IsValid(part)) return;
 	constructionPart = part;
 
-	constructionComponent->CreateStructure(constructionPart);
+	constructionComponent->CreateStructure(constructionPart, cost);
 	
 	OpenCloseBuildMenu();
 	
@@ -135,6 +149,7 @@ void APlayerCharacter::ChangeToBuildMappingContext()
 	if (!IsValid(subsystem)) return;
 
 	subsystem->AddMappingContext(buildMappingContext, 1);
+	//subsystem->RemoveMappingContext(defaultMappingContext);
 }
 
 void APlayerCharacter::ChangeToDefaultMappingContext()
@@ -144,8 +159,14 @@ void APlayerCharacter::ChangeToDefaultMappingContext()
 		
 	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
 	if (!IsValid(subsystem)) return;
+	//subsystem->AddMappingContext(buildMappingContext, 0);
 	
 	subsystem->RemoveMappingContext(buildMappingContext);
+}
+
+void APlayerCharacter::NoMoreMaterial()
+{
+	EndBuild();
 }
 
 void APlayerCharacter::Move(const FInputActionValue& actionValue)
@@ -269,6 +290,11 @@ void APlayerCharacter::BuildMenu()
 	ChangeToBuildMappingContext();
 	
 	OpenCloseBuildMenu();
+}
+
+void APlayerCharacter::PauseMenu()
+{
+	PauseGame();
 }
 
 void APlayerCharacter::RotateLeftStructure()

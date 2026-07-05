@@ -19,7 +19,7 @@ struct FHollowInfo
 	int index;
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAmountChanged, const FInventoryItem&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAmountChanged, FInventoryItem);
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 UCLASS(Blueprintable)
 class FINALP_API UInventoryComponent : public UActorComponent
@@ -38,7 +38,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<int, FInventoryItem> inventoryData;
+	TMap<int/*inventory position*/, FInventoryItem> inventoryData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UDataTable> itemDataTable{};
@@ -54,13 +54,19 @@ public:
 	int GetSize();
 	
 	UFUNCTION()
-	void LoadItem(FItemData item, int amount);
+	void LoadItem(int ID, int amount);
 
 	UFUNCTION()
 	void UnloadItem(FItemData item, int index);
 
 	UFUNCTION()
+	bool RemoveItem(int itemID, int amount);
+
+	UFUNCTION()
 	FItemData GetItem(int index);
+
+	UFUNCTION()
+	int GetItemAmount(int ID);
 
 	UFUNCTION()
 	void PrintInventory();
