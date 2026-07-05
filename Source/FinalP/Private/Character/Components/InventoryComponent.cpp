@@ -43,12 +43,12 @@ int UInventoryComponent::GetSize()
 	return actSize;
 }
 
-void UInventoryComponent::LoadItem(FItemData item, int amount)
+void UInventoryComponent::LoadItem(int ID, int amount)
 {
 	int index = -1;
 	for (const TPair<int, FInventoryItem>& pair : inventoryData)
 	{
-		if (pair.Value.ItemID == item.item_ID)
+		if (pair.Value.ItemID == ID)
 		{
 			index = pair.Key;
 			break;
@@ -68,7 +68,7 @@ void UInventoryComponent::LoadItem(FItemData item, int amount)
 		//Not at inventory yet
 		FInventoryItem NewItem;
 
-		NewItem.ItemID = item.item_ID;
+		NewItem.ItemID = ID;
 		NewItem.Amount = amount;
 
 		for (const TPair<int, FInventoryItem>& pair : inventoryData)

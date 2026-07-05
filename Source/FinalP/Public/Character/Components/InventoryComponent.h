@@ -54,7 +54,7 @@ public:
 	int GetSize();
 	
 	UFUNCTION()
-	void LoadItem(FItemData item, int amount);
+	void LoadItem(int ID, int amount);
 
 	UFUNCTION()
 	void UnloadItem(FItemData item, int index);

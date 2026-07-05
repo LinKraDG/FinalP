@@ -59,7 +59,7 @@ void UUnicItem::OnItemButtonPressed()
 	if (image == imageItemFrame)
 	{
 		hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		hud->GetInventoryWidget()->ShowHideOptions(ID);
+		//hud->GetInventoryWidget()->ShowHideOptions(ID);
 	}
 }
 

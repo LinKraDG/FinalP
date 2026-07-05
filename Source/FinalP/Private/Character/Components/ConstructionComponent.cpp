@@ -283,9 +283,10 @@ void UConstructionComponent::PlaceStructure()
 	//if (!actBuilding->GetValidConstruct()) return;
 	if (!buildable) return;
 
-	bool canContinue = false;
+	bool canContinue = true;
 	for (const TPair<int, int>& pair : actStructureCost)
 	{
+		if (canContinue == false) continue;
 		canContinue = player->GetInventory()->RemoveItem(pair.Key, pair.Value);
 	}
 	
@@ -296,16 +297,15 @@ void UConstructionComponent::PlaceStructure()
 	actBuilding->SetActorHiddenInGame(false);
 	actBuilding->SetActorEnableCollision(true);
 	actBuilding->ChangeColl();
+
+	actBuilding = nullptr;
+	
+	CreateGhost();
 	
 	if (!canContinue)
 	{
 		player->NoMoreMaterial();
-		return;
 	}
-	
-	actBuilding = nullptr;
-
-	CreateGhost();
 }
 
 void UConstructionComponent::EndBuild()

@@ -34,8 +34,10 @@ void AItemActor::Interact_Implementation(AActor* actor)
 	player = Cast<APlayerCharacter>(actor);
 
 	player->interactiveItem = this;
+
+	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
 	
-	player->inventoryComponent->LoadItem(itemData, quantity);
+	player->inventoryComponent->LoadItem(dataRow->item_ID, quantity);
 		
 }
 
