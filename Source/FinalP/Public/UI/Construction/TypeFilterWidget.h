@@ -22,8 +22,8 @@ private:
 protected:
 	virtual void NativeOnInitialized() override;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class APlayerHUD> hud{};
+	//UPROPERTY(EditAnywhere)
+	//TObjectPtr<class APlayerHUD> hud{};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UBorder> typeFrame{};
@@ -33,6 +33,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	FText textTypeFrame;
+
+	UPROPERTY(EditAnywhere)
+	FText textType;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> typeTextFrame;

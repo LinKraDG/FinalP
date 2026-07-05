@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Structs/CraftIngredient.h"
+#include "Structs/InventoryItem.h"
 #include "SelectionDataWidget.generated.h"
 
 /**
@@ -14,6 +16,14 @@ class FINALP_API USelectionDataWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UInventoryComponent> inventory{};
+	
+	void Refresh();
+
+	void OnInventoryItemChanged(FInventoryItem Item);
+	
 protected:
 	virtual void NativeOnInitialized() override;
 
@@ -26,10 +36,14 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> descriptionText{};
 
-	//AQUI EL COSTE
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<class UPanelWidget> structureCostPanel{};
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UButton> buildButton{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UBlueprintIngredientWidget> costWidget;
 
 	//Buttons functions
 	UFUNCTION()
@@ -42,4 +56,13 @@ protected:
 public:
 	UFUNCTION()
 	void SelectStructure(FConstructionData structureData);
+
+	UFUNCTION()
+	void CreateIngredientSlot(FCraftIngredient ingredient);
+
+	UFUNCTION()
+	void RemoveSlots();
+
+	UFUNCTION()
+	bool CheckHasMaterials();
 };

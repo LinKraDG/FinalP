@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/ItemData.h"
+#include "Structs/ItemData.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Interactive.h"
+#include "Structs/InventoryItem.h"
 #include "ItemActor.generated.h"
 
 UCLASS()
@@ -21,7 +22,8 @@ public:
 	TObjectPtr<class UStaticMeshComponent> staticMesh{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	FItemData itemData{};
+	FDataTableRowHandle itemData{};
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,6 +31,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class APlayerCharacter> player{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int quantity;
 	
 public:
 	// Called every frame

@@ -14,10 +14,12 @@ void APlayerHUD::BeginPlay()
 	if (!IsValid(playerWidgetClass)) return;
 	if (!IsValid(constructionMenuWidgetClass)) return;
 	if (!IsValid(inventoryWidgetClass)) return;
+	if (!IsValid(pauseWidgetClass)) return;
 
 	playerWidget = CreateWidget<UPlayerWidget>(GetWorld(), playerWidgetClass);
 	constructionMenuWidget = CreateWidget<UStructureMenuWidget>(GetWorld(), constructionMenuWidgetClass);
 	inventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), inventoryWidgetClass);
+	pauseWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), pauseWidgetClass);
 	
 	playerWidget->AddToViewport();
 	
@@ -26,6 +28,9 @@ void APlayerHUD::BeginPlay()
 	
 	inventoryWidget->AddToViewport();
 	inventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+	pauseWidget->AddToViewport();
+	pauseWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
 }
 
@@ -84,6 +89,34 @@ void APlayerHUD::OpenCloseInventory()
 		controller->SetPause(false);
 	}
 	
+}
+
+void APlayerHUD::OpenClosePauseMenu()
+{
+	if (!IsValid(playerWidget)) return;
+	if (!IsValid(pauseWidget)) return;
+
+	APlayerController* controller = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!IsValid(controller)) return;
+
+	if (playerWidget->IsVisible())
+	{
+		playerWidget->SetVisibility(ESlateVisibility::Collapsed);
+		pauseWidget->SetVisibility(ESlateVisibility::Visible);
+
+		controller->SetShowMouseCursor(true);
+		controller->SetInputMode(FInputModeGameAndUI());
+		controller->SetPause(true);
+	}
+	else
+	{
+		playerWidget->SetVisibility(ESlateVisibility::Visible);
+		pauseWidget->SetVisibility(ESlateVisibility::Collapsed);
+		
+		controller->SetShowMouseCursor(false);
+		controller->SetInputMode(FInputModeGameOnly());
+		controller->SetPause(false);
+	}
 }
 
 UInventoryWidget* APlayerHUD::GetInventoryWidget()

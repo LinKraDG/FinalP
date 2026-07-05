@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Construction/ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "UnicStructure.generated.h"
 
 /**

@@ -28,7 +28,7 @@ void AConstructionPart::BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 {
 	overlapCounter++;
 	validConstruct = false;
-	baseMeshComponent->SetMaterial(0, transparentBadMaterial);
+	//baseMeshComponent->SetMaterial(0, transparentBadMaterial);
 }
 
 void AConstructionPart::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -38,14 +38,14 @@ void AConstructionPart::EndOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	if (overlapCounter == 0)
 	{
 		validConstruct = true;
-		baseMeshComponent->SetMaterial(0, transparentMaterial);
+		//baseMeshComponent->SetMaterial(0, transparentMaterial);
 	}
 }
 
 void AConstructionPart::SetTransparentMaterial()
 {
 	validConstruct = true;
-	baseMeshComponent->SetMaterial(0, transparentMaterial);
+	//baseMeshComponent->SetMaterial(0, transparentMaterial);
 	//SetActorEnableCollision(false);
 	//boxCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	//boxCollision->SetCollisionResponseToAllChannels(ECR_Overlap);
@@ -54,9 +54,9 @@ void AConstructionPart::SetTransparentMaterial()
 
 }
 
-void AConstructionPart::ChangeMaterial()
+void AConstructionPart::ChangeColl()
 {
-	baseMeshComponent->SetMaterial(0, originalMaterial);
+	//baseMeshComponent->SetMaterial(0, originalMaterial);
 	
 	boxCollision->BodyInstance.SetCollisionProfileName("BlockAll");
 	baseMeshComponent->BodyInstance.SetCollisionProfileName("BlockAll");
@@ -81,13 +81,18 @@ bool AConstructionPart::GetValidConstruct()
 	return validConstruct;
 }
 
+UStaticMeshComponent* AConstructionPart::GetStructureMesh()
+{
+	return baseMeshComponent;
+}
+
 // Called when the game starts or when spawned
 void AConstructionPart::BeginPlay()
 {
 	Super::BeginPlay();
 
-	boxCollision->OnComponentBeginOverlap.AddUniqueDynamic(this, &AConstructionPart::BeginOverlap);
-	boxCollision->OnComponentEndOverlap.AddUniqueDynamic(this, &AConstructionPart::EndOverlap);
+	//boxCollision->OnComponentBeginOverlap.AddUniqueDynamic(this, &AConstructionPart::BeginOverlap);
+	//boxCollision->OnComponentEndOverlap.AddUniqueDynamic(this, &AConstructionPart::EndOverlap);
 }
 
 // Called every frame

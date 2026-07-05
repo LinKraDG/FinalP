@@ -10,7 +10,7 @@
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
-#include "Construction/ConstructionData.h"
+#include "Structs/ConstructionData.h"
 #include "Construction/ConstructionPart.h"
 #include "UI/Construction/UnicStructure.h"
 
@@ -20,16 +20,31 @@ UPanelWidget* UStructureMenuWidget::GetStructurePanel()
 }
 
 //First step to create slots of unlocked recipes for select to build, continue to CreateStructureSlot
-void UStructureMenuWidget::SlotCreation(UDataTable* table, TArray<FName> names)
+void UStructureMenuWidget::SlotCreation(UDataTable* table, TArray<FName> names, EStructureType type)
 {
 	if (!IsValid(table)) return;
 	dataTable = table;
-	
+
 	for (FName n : names)
 	{
 		if (!table->GetRowNames().Contains(n)) return;
 
-		CreateStructureSlot(n);
+		FConstructionData* data = dataTable->FindRow<FConstructionData>(n, TEXT("ProcessingRows"));
+		if (!data) return;
+
+		switch (type)
+		{
+			//All recipes
+			case EStructureType::None:
+				CreateStructureSlot(n);
+				break;
+			//Only filtered recipes
+			default:
+				if (data->type == type)
+				{
+					CreateStructureSlot(n);
+				}
+		}
 	}
 }
 
@@ -40,28 +55,13 @@ void UStructureMenuWidget::CreateStructureSlot(FName row)
 
 	UUnicStructure* newStructureBlueprint = CreateWidget<UUnicStructure>(GetWorld(), structuresWidget); 
 	newStructureBlueprint->SetData(*dataRow);
-	
-	//TODO-- añadir paneles para cada categoria y cada tipo de estructura
-
-	//TODO-- una vez añadidos paneles para cada uno hacer que se añadan como hijos de dichos paneles
-	/*switch (dataRow->type)
-	{
-		case EStructureType::Decorative:
-			break;
-		case EStructureType::Production:
-			break;
-		case EStructureType::Logistic:
-			break;
-		case EStructureType::Organization:
-			break;
-		default:
-			break;
-	}*/
-
 	Cast<UUniformGridPanel>(structureBlueprintsPanel)->AddChildToUniformGrid(newStructureBlueprint, 0, structureBlueprintsPanel->GetAllChildren().Num());
 
+}
 
-	
+void UStructureMenuWidget::RemoveSlots()
+{
+	Cast<UUniformGridPanel>(structureBlueprintsPanel)->ClearChildren();
 }
 
 USelectionDataWidget* UStructureMenuWidget::GetSelectionWidget()

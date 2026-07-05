@@ -34,17 +34,16 @@ void AItemActor::Interact_Implementation(AActor* actor)
 	player = Cast<APlayerCharacter>(actor);
 
 	player->interactiveItem = this;
+
+	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
 	
-	if (player->inventoryComponent->CheckHollow(itemData).isEmpty)
-	{
-		player->inventoryComponent->LoadItem(itemData, player->inventoryComponent->CheckHollow(itemData).index);
-	}
+	player->inventoryComponent->LoadItem(dataRow->item_ID, quantity);
 		
 }
 
 void AItemActor::ReduceQuantity(int extract)
 {
-	itemData.quantity -= extract;
+	quantity -= extract;
 	Interact_Implementation(player);
 }
 

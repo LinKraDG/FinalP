@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Structs/InventoryItem.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT()
@@ -18,6 +19,8 @@ struct FHollowInfo
 	int index;
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAmountChanged, FInventoryItem);
+DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 UCLASS(Blueprintable)
 class FINALP_API UInventoryComponent : public UActorComponent
 {
@@ -26,13 +29,19 @@ class FINALP_API UInventoryComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
-
+	
+	FOnItemAmountChanged OnItemAmountChanged;
+	FOnInventoryUpdated OnInventoryUpdated;
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FItemData> inventoryData;
+	TMap<int/*inventory position*/, FInventoryItem> inventoryData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UDataTable> itemDataTable{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int actSize;
@@ -45,17 +54,23 @@ public:
 	int GetSize();
 	
 	UFUNCTION()
-	FHollowInfo CheckHollow(FItemData data);
-	
-	UFUNCTION()
-	void LoadItem(FItemData item, int index);
+	void LoadItem(int ID, int amount);
 
 	UFUNCTION()
 	void UnloadItem(FItemData item, int index);
 
 	UFUNCTION()
+	bool RemoveItem(int itemID, int amount);
+
+	UFUNCTION()
 	FItemData GetItem(int index);
 
 	UFUNCTION()
+	int GetItemAmount(int ID);
+
+	UFUNCTION()
 	void PrintInventory();
+
+	UFUNCTION()
+	void NotifyChanges(FInventoryItem item);
 };

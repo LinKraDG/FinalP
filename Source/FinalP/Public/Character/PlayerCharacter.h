@@ -31,6 +31,9 @@ public:
 	
 	UFUNCTION()
 	void OpenCloseBuildMenu();
+
+	UFUNCTION()
+	void PauseGame();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -74,6 +77,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputAction> buildAction{};
 
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputAction> pauseAction{};
+
 
 	//Build inputs----------------------------------
 	UPROPERTY(EditAnywhere, Category = BuildInput)
@@ -100,6 +106,7 @@ protected:
 	void Interact();
 	void InventoryMenu();
 	void BuildMenu();
+	void PauseMenu();
 
 	
 	//Build Input Functions------------------------
@@ -124,11 +131,15 @@ public:
 	UConstructionComponent* GetConstruction();
 
 	UFUNCTION()
-	void SetConstructionMode(TSubclassOf<AConstructionPart> part);
+	void SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int, int> cost);
 
 	UFUNCTION()
 	void ChangeToBuildMappingContext();
 
 	UFUNCTION()
 	void ChangeToDefaultMappingContext();
+
+	UFUNCTION()
+	void NoMoreMaterial();
+	
 };
