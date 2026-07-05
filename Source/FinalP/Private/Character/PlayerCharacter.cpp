@@ -14,6 +14,8 @@
 #include "Construction/ConstructionPart.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Interactive.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
