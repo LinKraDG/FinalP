@@ -28,7 +28,6 @@ void UBlueprintIngredientWidget::SetData(FItemData ingredient, int amount)
 	{
 		inventory->OnItemAmountChanged.AddUObject(this, &UBlueprintIngredientWidget::OnInventoryItemChanged);
 	}
-	
 }
 
 bool UBlueprintIngredientWidget::GetHasMaterials()

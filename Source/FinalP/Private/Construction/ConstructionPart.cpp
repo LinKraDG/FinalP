@@ -4,6 +4,8 @@
 #include "Construction/ConstructionPart.h"
 
 #include "Components/BoxComponent.h"
+#include "Engine/GameInstance.h"
+#include "World/TechTreeSubsystem.h"
 
 // Sets default values
 AConstructionPart::AConstructionPart()
@@ -79,6 +81,17 @@ void AConstructionPart::SetPlace(FVector place)
 bool AConstructionPart::GetValidConstruct()
 {
 	return validConstruct;
+}
+
+void AConstructionPart::OnPlaced()
+{
+	bIsPlaced = true;
+
+	if (UGameInstance* gameInstance = GetGameInstance()){
+		if (UTechTreeSubsystem* techTree = gameInstance->GetSubsystem<UTechTreeSubsystem>()){
+			techTree->TryAutoResearchAll();
+		}
+	}
 }
 
 UStaticMeshComponent* AConstructionPart::GetStructureMesh()

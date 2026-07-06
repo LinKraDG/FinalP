@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "PlayerCharacter.generated.h"
 
+class UStaminaComponent;
 
 UCLASS()
 class FINALP_API APlayerCharacter : public ACharacter
@@ -20,6 +21,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AConstructionPart> constructionPart{};
 
+	TMap<int, int> constructionCost{};
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
@@ -28,12 +31,28 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UConstructionComponent> constructionComponent{};
-	
+
+	UPROPERTY(EditAnywhere, Category = Components)
+	TObjectPtr<UStaminaComponent> staminaComponent{};
+
+	UPROPERTY(EditAnywhere, Category = Movement)
+	float walkSpeed = 600.f;
+
+	UPROPERTY(EditAnywhere, Category = Movement)
+	float sprintSpeed = 1000.f;
+
 	UFUNCTION()
 	void OpenCloseBuildMenu();
 
+	UPROPERTY(EditAnywhere, Category = "Machine Link")
+	TSubclassOf<class AConveyorBelt> defaultConveyorBeltClass{};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Link")
+	TObjectPtr<class AMachineBase> pendingLinkSource{};
+
 	UFUNCTION()
 	void PauseGame();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -66,6 +85,9 @@ protected:
 	TObjectPtr<class UInputAction> interactAction{};
 
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputAction> sprintAction{};
+
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputAction> inventoryAction{};
 
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
@@ -76,6 +98,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputAction> buildAction{};
+
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputAction> LinkAction{};
+
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputAction> CancelLinkAction{};
 
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputAction> pauseAction{};
@@ -104,11 +132,14 @@ protected:
 	void ZoomInCameraChange();
 	void ZoomOutCameraChange();
 	void Interact();
+	void SelectMachineForLink();
+	void CancelLink();
 	void InventoryMenu();
 	void BuildMenu();
+	void StartSprint();
+	void StopSprint();
 	void PauseMenu();
 
-	
 	//Build Input Functions------------------------
 	void RotateLeftStructure();
 	void RotateRightStructure();
@@ -116,18 +147,21 @@ protected:
 	void EndBuild();
 
 private:
-	
-public:	
+	bool bWantsToSprint = false;
+
+	void UpdateStaminaUI();
+
+public:
 	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintPure)
 	UInventoryComponent* GetInventory();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintPure)
 	UConstructionComponent* GetConstruction();
 
 	UFUNCTION()

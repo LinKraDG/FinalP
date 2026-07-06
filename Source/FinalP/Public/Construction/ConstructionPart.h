@@ -22,6 +22,8 @@ private:
 	bool validConstruct;
 	int overlapCounter;
 	
+	bool bIsPlaced = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -61,7 +63,14 @@ public:
 	void SetPlace(FVector place);
 
 	UFUNCTION()
-	bool GetValidConstruct();
+	virtual bool GetValidConstruct();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void OnPlaced();
+
+	bool IsPlaced() const { return bIsPlaced; }
+
+	void MarkAsBlueprint() { bIsPlaced = false; }
 
 	UFUNCTION()
 	UStaticMeshComponent* GetStructureMesh();
