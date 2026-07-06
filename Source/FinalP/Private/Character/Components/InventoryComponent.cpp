@@ -84,12 +84,92 @@ void UInventoryComponent::LoadItem(FItemData item, int amount)
 	}
 }
 
-void UInventoryComponent::UnloadItem(FItemData item, int amount)
+int32 UInventoryComponent::AddItem(FItemData item, int32 amount)
 {
-	FInventoryItem* IItem = inventoryData.Find(item.item_ID);
+	int32 remaining = amount;
+	if (remaining <= 0){
+		return 0;
+	}
+
+	const int32 maxStack = item.max_quant > 0 ? item.max_quant : remaining;
+
+	for (TPair<int, FInventoryItem>& pair : inventoryData){
+		if (remaining <= 0) break;
+		if (pair.Value.ItemID != item.item_ID) continue;
+
+		const int32 space = maxStack - pair.Value.Amount;
+		if (space > 0)
+		{
+			const int32 toAdd = FMath::Min(space, remaining);
+			pair.Value.Amount += toAdd;
+			remaining -= toAdd;
+			NotifyChanges(pair.Value);
+		}
+	}
+
+	for (TPair<int, FInventoryItem>& pair : inventoryData){
+		if (remaining <= 0) break;
+		if (pair.Value.ItemID != INDEX_NONE) continue;
+
+		const int32 toAdd = FMath::Min(maxStack, remaining);
+		pair.Value.ItemID = item.item_ID;
+		pair.Value.Amount = toAdd;
+		remaining -= toAdd;
+		NotifyChanges(pair.Value);
+	}
+	PrintInventory();
+	return remaining;
+}
+
+bool UInventoryComponent::RemoveItem(int32 itemId, int32 amount)
+{
+	if (amount <= 0){
+		return false;
+	}
+
+	int32 totalAvailable = 0;
+	for (const TPair<int, FInventoryItem>& pair : inventoryData){
+		if (pair.Value.ItemID == itemId){
+			totalAvailable += pair.Value.Amount;
+		}
+	}
+
+	if (totalAvailable < amount){
+		return false;
+	}
+
+	int32 remaining = amount;
+	for (TPair<int, FInventoryItem>& pair : inventoryData){
+		if (remaining <= 0) break;
+		if (pair.Value.ItemID != itemId) continue;
+
+		const int32 toRemove = FMath::Min(remaining, pair.Value.Amount);
+		pair.Value.Amount -= toRemove;
+		remaining -= toRemove;
+
+		if (pair.Value.Amount <= 0){
+			pair.Value = FInventoryItem();
+		}
+
+		NotifyChanges(pair.Value);
+	}
+
+	PrintInventory();
+	return true;
+}
+
+void UInventoryComponent::UnloadItem(FItemData item, int index)
+{
+	TArray<int> keys;
+	inventoryData.GenerateKeyArray(keys);
+
+	if (!keys.IsValidIndex(index)){return;}
+
+	FInventoryItem* IItem = inventoryData.Find(keys[index]);
+	if (!IItem){return;}
+
 	FInventoryItem removed = *IItem;
-	removed.Amount = 0;
-	inventoryData.Remove(item.item_ID);
+	*IItem = FInventoryItem();
 	NotifyChanges(removed);
 }
 
@@ -97,8 +177,14 @@ FItemData UInventoryComponent::GetItem(int index)
 {
 	TArray<FInventoryItem> vals;
 	inventoryData.GenerateValueArray(vals);
-	const FItemData* Row = itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(vals[index].ItemID)),TEXT("InventoryLookup"));
-	return FItemData(*Row);
+
+	if (!vals.IsValidIndex(index) || !itemDataTable)
+	{
+		return FItemData{};
+	}
+
+	const FItemData* Row = itemDataTable->FindRow<FItemData>(FName(*FString::FromInt(vals[index].ItemID)), TEXT("InventoryLookup"));
+	return Row ? FItemData(*Row) : FItemData{};
 }
 
 void UInventoryComponent::PrintInventory()

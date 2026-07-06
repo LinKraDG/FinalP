@@ -72,6 +72,9 @@ public:
 	void LoadRecipes();
 
 	UFUNCTION()
+	void HandleTechNodeUnlocked(FName nodeId);
+
+	UFUNCTION()
 	void GetCraftablesStructures(FName rowName);
 	
 	UFUNCTION()

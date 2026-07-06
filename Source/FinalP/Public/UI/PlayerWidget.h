@@ -6,9 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "PlayerWidget.generated.h"
 
-/**
- * 
- */
+class UTextBlock;
+class UProgressBar;
+
 UCLASS()
 class FINALP_API UPlayerWidget : public UUserWidget
 {
@@ -16,8 +16,12 @@ class FINALP_API UPlayerWidget : public UUserWidget
 
 protected:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	TObjectPtr<class UTextBlock> buildText{};
+	TObjectPtr<UTextBlock> buildText;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> staminaBar;
 
 public:
-
+	UFUNCTION(BlueprintCallable)
+	void SetStaminaPercent(float percent);
 };

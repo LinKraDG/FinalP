@@ -11,6 +11,8 @@
 #include "UI/PlayerHUD.h"
 #include "UI/Construction/StructureMenuWidget.h"
 #include "UI/Construction/UnicStructure.h"
+#include "Engine/GameInstance.h"
+#include "World/TechTreeSubsystem.h"
 
 
 // Sets default values for this component's properties
@@ -31,7 +33,13 @@ void UConstructionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	
+
+	if (UGameInstance* gameInstance = GetWorld()->GetGameInstance()){
+		if (UTechTreeSubsystem* techTree = gameInstance->GetSubsystem<UTechTreeSubsystem>()){
+			techTree->OnTechNodeUnlock.AddDynamic(this, &UConstructionComponent::HandleTechNodeUnlocked);
+		}
+	}
+
 	// ...
 	if (!IsValid(dataTable)) return;
 
@@ -48,24 +56,35 @@ void UConstructionComponent::BeginPlay()
 void UConstructionComponent::LoadRecipes()
 {
 	if (!IsValid(dataTable)) return;
-	
+
+	UTechTreeSubsystem* techTree = nullptr;
+	if (UGameInstance* gameInstance = GetWorld()->GetGameInstance()){
+		techTree = gameInstance->GetSubsystem<UTechTreeSubsystem>();
+	}
+
 	TArray<FName> rowNames = dataTable->GetRowNames();
-	
+
 	for (FName name : rowNames)
 	{
 		if (dataRow!=nullptr) dataRow=nullptr;
-		
+
 		if (!unlockedStructuresData.Contains(name))
 		{
 			GetCraftablesStructures(name);
-			if (dataRow->unlockLevel<=actLevel)
+			if (dataRow->unlockLevel<=actLevel || (techTree && techTree->IsBuildingUnlocked(name)))
 			{
 				unlockedStructuresData.Add(name);
 			}
 		}
-		
+
 		if (dataRow!=nullptr) dataRow=nullptr;
 	}
+}
+
+void UConstructionComponent::HandleTechNodeUnlocked(FName nodeId)
+{
+	LoadRecipes();
+	UpdateRecipeSlots();
 }
 
 //Get the row by the name
@@ -287,7 +306,8 @@ void UConstructionComponent::PlaceStructure()
 	actBuilding->SetActorHiddenInGame(false);
 	actBuilding->SetActorEnableCollision(true);
 	actBuilding->ChangeColl();
-	
+	actBuilding->OnPlaced();
+
 	actBuilding = nullptr;
 	CreateGhost();
 }

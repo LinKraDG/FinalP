@@ -21,5 +21,5 @@ void UBlueprintIngredientWidget::SetData(FCraftIngredient  ingredient)
 	
 	nameText->SetText(FText::FromString(data->name));
 	//actAmountText->SetText(FText::FromInt(data->name));
-	costText->SetText(FText::FromString(ingredient.amount+""));
+	costText->SetText(FText::AsNumber(ingredient.amount));
 }

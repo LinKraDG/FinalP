@@ -3,7 +3,6 @@
 
 #include "Items/ItemActor.h"
 
-#include "IDetailTreeNode.h"
 #include "Character/PlayerCharacter.h"
 #include "Character/Components/InventoryComponent.h"
 #include "Components/BoxComponent.h"
@@ -29,14 +28,17 @@ void AItemActor::BeginPlay()
 
 void AItemActor::Interact_Implementation(AActor* actor)
 {
-	IInteractive::Interact_Implementation(actor);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Interactuando!"));
 	player = Cast<APlayerCharacter>(actor);
+	if (!IsValid(player) || !IsValid(player->inventoryComponent))
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Interactuando!"));
 
 	player->interactiveItem = this;
-	
+
 	player->inventoryComponent->LoadItem(itemData, quantity);
-		
 }
 
 void AItemActor::ReduceQuantity(int extract)

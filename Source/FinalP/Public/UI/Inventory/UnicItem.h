@@ -32,7 +32,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UBorder> item{};
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UVerticalBox> options{};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
