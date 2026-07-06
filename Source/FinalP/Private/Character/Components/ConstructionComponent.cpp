@@ -7,6 +7,7 @@
 #include "Character/PlayerCharacter.h"
 #include "Components/PanelWidget.h"
 //#include "Structs/ConstructionData.h"
+#include "Character/Components/InventoryComponent.h"
 #include "Construction/ConstructionPart.h"
 #include "UI/PlayerHUD.h"
 #include "UI/Construction/StructureMenuWidget.h"
@@ -158,7 +159,7 @@ void UConstructionComponent::PrintUnlockedRecipes()
 	}
 }
 
-void UConstructionComponent::CreateStructure(TSubclassOf<AConstructionPart>& constructionPart)
+void UConstructionComponent::CreateStructure(TSubclassOf<AConstructionPart>& constructionPart, TMap<int, int> cost)
 {
 	if (!IsValid(constructionPart)) return;
 
@@ -167,6 +168,8 @@ void UConstructionComponent::CreateStructure(TSubclassOf<AConstructionPart>& con
 		actSelectedPart = constructionPart;
 	}
 
+	actStructureCost = cost;
+	
 	CreateGhost();
 	
 	//actBuilding->SetTransparentMaterial();
@@ -299,6 +302,13 @@ void UConstructionComponent::PlaceStructure()
 	//if (!actBuilding->GetValidConstruct()) return;
 	if (!buildable) return;
 
+	bool canContinue = true;
+	for (const TPair<int, int>& pair : actStructureCost)
+	{
+		if (canContinue == false) continue;
+		canContinue = player->GetInventory()->RemoveItem(pair.Key, pair.Value);
+	}
+	
 	previewMesh->DestroyComponent();
 
 	actBuilding->SetActorRotation(structureRotator);
@@ -309,7 +319,13 @@ void UConstructionComponent::PlaceStructure()
 	actBuilding->OnPlaced();
 
 	actBuilding = nullptr;
+	
 	CreateGhost();
+	
+	if (!canContinue)
+	{
+		player->NoMoreMaterial();
+	}
 }
 
 void UConstructionComponent::EndBuild()

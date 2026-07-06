@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Inventory/InventoryWidget.h"
 #include "GameFramework/HUD.h"
+#include "Pause/PauseMenuWidget.h"
 #include "PlayerHUD.generated.h"
 
 /**
@@ -30,6 +31,9 @@ private:
 
 	bool bMachineWidgetOpen = false;
 
+	UPROPERTY()
+	UPauseMenuWidget* pauseWidget = nullptr;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
 	TSubclassOf<UPlayerWidget> playerWidgetClass = nullptr;
@@ -39,6 +43,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
 	TSubclassOf<UInventoryWidget> inventoryWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = Settings)
+	TSubclassOf<UPauseMenuWidget> pauseWidgetClass = nullptr;
 
 	virtual void BeginPlay() override;
 public:
@@ -62,6 +69,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UPlayerWidget* GetPlayerWidget();
+
+	UFUNCTION(BlueprintCallable)
+	void OpenClosePauseMenu();
 
 	UFUNCTION(BlueprintCallable)
 	UInventoryWidget* GetInventoryWidget();

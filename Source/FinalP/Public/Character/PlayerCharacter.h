@@ -21,6 +21,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AConstructionPart> constructionPart{};
 
+	TMap<int, int> constructionCost{};
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
@@ -47,6 +49,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Link")
 	TObjectPtr<class AMachineBase> pendingLinkSource{};
+
+	UFUNCTION()
+	void PauseGame();
 
 protected:
 	// Called when the game starts or when spawned
@@ -100,6 +105,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputAction> CancelLinkAction{};
 
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputAction> pauseAction{};
+
+
 	//Build inputs----------------------------------
 	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputMappingContext> buildMappingContext{};
@@ -129,7 +138,7 @@ protected:
 	void BuildMenu();
 	void StartSprint();
 	void StopSprint();
-
+	void PauseMenu();
 
 	//Build Input Functions------------------------
 	void RotateLeftStructure();
@@ -156,12 +165,15 @@ public:
 	UConstructionComponent* GetConstruction();
 
 	UFUNCTION()
-	void SetConstructionMode(TSubclassOf<AConstructionPart> part);
+	void SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int, int> cost);
 
 	UFUNCTION()
 	void ChangeToBuildMappingContext();
 
 	UFUNCTION()
 	void ChangeToDefaultMappingContext();
+
+	UFUNCTION()
+	void NoMoreMaterial();
 	
 };

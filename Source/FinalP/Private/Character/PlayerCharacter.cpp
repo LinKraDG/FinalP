@@ -18,6 +18,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Interactive.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -52,6 +54,19 @@ void APlayerCharacter::OpenCloseBuildMenu()
 
 	auto * hud = Cast<APlayerHUD>(playerController->GetHUD());
 	hud->OpenCloseConstructionMenu();
+}
+
+void APlayerCharacter::PauseGame()
+{
+	if (!IsValid(Controller)) return;
+	
+	APlayerController* playerController = Cast<APlayerController>(Controller);
+	if (!IsValid(playerController)) return;
+	
+	APlayerHUD* hud = Cast<APlayerHUD>(playerController->GetHUD());
+	if (!IsValid(hud)) return;
+
+	hud->OpenClosePauseMenu();
 }
 
 // Called when the game starts or when spawned
@@ -124,6 +139,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EDefaultInputComponent->BindAction(inventoryAction, ETriggerEvent::Started, this, &APlayerCharacter::InventoryMenu);
 	EDefaultInputComponent->BindAction(LinkAction, ETriggerEvent::Started, this, &APlayerCharacter::SelectMachineForLink);
 	EDefaultInputComponent->BindAction(CancelLinkAction, ETriggerEvent::Started, this, &APlayerCharacter::CancelLink);
+	EDefaultInputComponent->BindAction(pauseAction, ETriggerEvent::Started, this, &APlayerCharacter::PauseMenu);
 	//Build actions
 	EDefaultInputComponent->BindAction(rotateLeftStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateLeftStructure);
 	EDefaultInputComponent->BindAction(rotateRightStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateRightStructure);
@@ -150,12 +166,13 @@ UConstructionComponent* APlayerCharacter::GetConstruction()
 	return constructionComponent;
 }
 
-void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part)
+void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int,int> cost)
 {
 	if (!IsValid(part)) return;
 	constructionPart = part;
+	constructionCost = cost;
 
-	constructionComponent->CreateStructure(constructionPart);
+	constructionComponent->CreateStructure(constructionPart, cost);
 
 	OpenCloseBuildMenu();
 
@@ -171,6 +188,7 @@ void APlayerCharacter::ChangeToBuildMappingContext()
 	if (!IsValid(subsystem)) return;
 
 	subsystem->AddMappingContext(buildMappingContext, 1);
+	//subsystem->RemoveMappingContext(defaultMappingContext);
 }
 
 void APlayerCharacter::ChangeToDefaultMappingContext()
@@ -182,6 +200,11 @@ void APlayerCharacter::ChangeToDefaultMappingContext()
 	if (!IsValid(subsystem)) return;
 
 	subsystem->RemoveMappingContext(buildMappingContext);
+}
+
+void APlayerCharacter::NoMoreMaterial()
+{
+	EndBuild();
 }
 
 void APlayerCharacter::Move(const FInputActionValue& actionValue)
@@ -360,6 +383,11 @@ void APlayerCharacter::StopSprint()
 	bWantsToSprint = false;
 }
 
+void APlayerCharacter::PauseMenu()
+{
+	PauseGame();
+}
+
 void APlayerCharacter::RotateLeftStructure()
 {
 	if (!IsValid(Controller)) return;
@@ -379,7 +407,7 @@ void APlayerCharacter::PlaceStructure()
 	if (!IsValid(Controller)) return;
 
 	constructionComponent->PlaceStructure();
-	constructionComponent->CreateStructure(constructionPart);
+	constructionComponent->CreateStructure(constructionPart, constructionCost);
 }
 
 void APlayerCharacter::EndBuild()

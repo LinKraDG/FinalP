@@ -58,7 +58,7 @@ void AResourceNode::Interact_Implementation(AActor* actor)
 		return;
 	}
 
-	playerChar->inventoryComponent->LoadItem(stack, extracted);
+	playerChar->inventoryComponent->LoadItem(stack.item_ID, extracted);
 }
 
 int32 AResourceNode::ExtractUnits(int32 requested)

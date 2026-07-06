@@ -38,7 +38,9 @@ void AItemActor::Interact_Implementation(AActor* actor)
 
 	player->interactiveItem = this;
 
-	player->inventoryComponent->LoadItem(itemData, quantity);
+	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
+
+	player->inventoryComponent->LoadItem(dataRow->item_ID, quantity);
 }
 
 void AItemActor::ReduceQuantity(int extract)
