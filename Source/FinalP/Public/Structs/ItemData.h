@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "ItemData.generated.h"
 
 UENUM(BlueprintType)
@@ -37,4 +39,10 @@ struct FItemData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AActor* itemClass;*/
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsMagicRune = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float runeDuration;
+
 };

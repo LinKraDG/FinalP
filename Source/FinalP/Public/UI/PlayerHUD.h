@@ -29,9 +29,11 @@ private:
 	UPROPERTY()
 	UInventoryWidget* inventoryWidget = nullptr;
 
+	bool bMachineWidgetOpen = false;
+
 	UPROPERTY()
 	UPauseMenuWidget* pauseWidget = nullptr;
-	
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
 	TSubclassOf<UPlayerWidget> playerWidgetClass = nullptr;
@@ -52,6 +54,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OpenCloseInventory();
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerWidgetVisible(bool bVisible);
+
+	UFUNCTION(BlueprintCallable)
+	void NotifyMachineWidgetOpened();
+
+	UFUNCTION(BlueprintCallable)
+	void NotifyMachineWidgetClosed();
+
+	UFUNCTION(BlueprintPure)
+	bool IsAnyMenuOpen() const;
+
+	UFUNCTION(BlueprintCallable)
+	UPlayerWidget* GetPlayerWidget();
 
 	UFUNCTION(BlueprintCallable)
 	void OpenClosePauseMenu();

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Structs/InventoryItem.h"
+#include "Structs/ItemData.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT()
@@ -56,11 +57,14 @@ public:
 	UFUNCTION()
 	void LoadItem(int ID, int amount);
 
-	UFUNCTION()
-	void UnloadItem(FItemData item, int index);
+	UFUNCTION(BlueprintCallable)
+	int32 AddItem(FItemData item, int32 amount);
+
+	UFUNCTION(BlueprintCallable)
+	bool RemoveItem(int32 itemId, int32 amount = 1);
 
 	UFUNCTION()
-	bool RemoveItem(int itemID, int amount);
+	void UnloadItem(FItemData item, int index);
 
 	UFUNCTION()
 	FItemData GetItem(int index);
