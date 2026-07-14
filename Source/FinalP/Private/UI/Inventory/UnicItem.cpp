@@ -41,8 +41,8 @@ UVerticalBox* UUnicItem::GetOptions()
 
 void UUnicItem::SetNoneImage()
 {
-	frame->SetVisibility(ESlateVisibility::Visible);
-	frame->SetBrushFromTexture(imageFrame);
+	//frame->SetVisibility(ESlateVisibility::Visible);
+	//frame->SetBrushFromTexture(imageFrame);
 }
 
 void UUnicItem::SetFrameImage()

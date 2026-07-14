@@ -210,20 +210,83 @@ void UConstructionComponent::MoveStructure()
 	params.AddIgnoredActor(actBuilding);
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
+
+	bool overlap = true;
+	bool inGround = true;
 	
 	switch (bHit)
 	{
 		case true:
 			structurePlace = {round(hitResult.Location.X/100.f)*100.f,round(hitResult.Location.Y/100.f)*100.f,round(hitResult.Location.Z/100.f)*100.f};
 			previewMesh->SetWorldTransform(FTransform(structureRotator,structurePlace,{1.f,1.f,1.f}));
-			AvailableColor(CheckOverlap());
+			overlap = CheckOverlap();
+			inGround = CheckInGround();
+			if (overlap == false || inGround == false)
+			{
+				AvailableColor(false);
+			}
+			else
+			{
+				AvailableColor(true);
+			}
 			break;
 		case false:
 			structurePlace = {round(endLocation.X/100)*100,round(endLocation.Y/100)*100,round(endLocation.Z/100)*100};
 			previewMesh->SetWorldTransform(FTransform(structureRotator,structurePlace,{1.f,1.f,1.f}));
-			AvailableColor(CheckOverlap());
+			overlap = CheckOverlap();
+			inGround = CheckInGround();
+			if (overlap == false || inGround == false)
+			{
+				AvailableColor(false);
+			}
+			else
+			{
+				AvailableColor(true);
+			}
 			break;
 	}
+}
+
+bool UConstructionComponent::SweepBox(UStaticMeshComponent* Mesh, const FVector& Start, const FVector& End,
+	const FVector& BoxExtent, ECollisionChannel Channel, FHitResult& Hit)
+{
+	if (!Mesh)
+	{
+		return false;
+	}
+
+	UWorld* World = GetWorld();
+
+	if (!World)
+	{
+		return false;
+	}
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+	Params.AddIgnoredActor(Mesh->GetOwner());
+
+	const bool bHit = World->SweepSingleByChannel(
+		Hit,
+		Start,
+		End,
+		Mesh->GetComponentQuat(),
+		Channel,
+		FCollisionShape::MakeBox(BoxExtent),
+		Params);
+
+	DrawDebugBox(
+		World,
+		End,
+		BoxExtent,
+		Mesh->GetComponentQuat(),
+		bHit ? FColor::Green : FColor::Red,
+		false,
+		0.f,
+		0,
+		2.f);
+
+	return bHit;
 }
 
 bool UConstructionComponent::CheckOverlap()
@@ -234,7 +297,7 @@ bool UConstructionComponent::CheckOverlap()
 		return false;
 	}
 
-	FVector Location = previewMesh->Bounds.Origin;;
+	FVector Location = previewMesh->Bounds.Origin;
 	FQuat Rotation = previewMesh->GetComponentQuat();
 
 	FVector origin;
@@ -242,7 +305,7 @@ bool UConstructionComponent::CheckOverlap()
 
 	previewMesh->GetLocalBounds(origin, extent);
 
-	extent *= 0.25f;
+	extent *= 0.40f;
 
 	FHitResult Hit;
 
@@ -252,17 +315,52 @@ bool UConstructionComponent::CheckOverlap()
 	bool bHit = !World->SweepSingleByChannel(Hit, Location, Location, Rotation, ECC_WorldStatic, FCollisionShape::MakeBox(extent), params);
 
 	DrawDebugBox(
-	GetWorld(),
-	Location,
-	extent,
-	Rotation,
-	bHit ? FColor::Red : FColor::Green,
-	false,
-	0.0f,
-	0,
-	2.0f
-);
+		GetWorld(),
+		Location,
+		extent,
+		Rotation,
+		bHit ? FColor::Red : FColor::Green,
+		false,
+		0.0f,
+		0,
+		2.0f
+	);
+	
 	return bHit;
+}
+
+bool UConstructionComponent::CheckInGround()
+{
+	if (!previewMesh)
+	{
+		return false;
+	}
+
+	FVector Min;
+	FVector Max;
+
+	previewMesh->GetLocalBounds(Min, Max);
+
+	const FVector FullExtent = (Max - Min) * 0.5f;
+
+	FVector GroundExtent = FullExtent;
+	GroundExtent.Z = 5.f;
+
+	const FVector Up = previewMesh->GetUpVector();
+
+	const FVector BottomCenter =
+		previewMesh->Bounds.Origin -
+		Up * (FullExtent.Z - GroundExtent.Z);
+
+	FHitResult Hit;
+
+	return SweepBox(
+		previewMesh,
+		BottomCenter,
+		BottomCenter - Up * 10.f,
+		GroundExtent,
+		ECC_GameTraceChannel1,
+		Hit);
 }
 
 void UConstructionComponent::AvailableColor(bool canBuild)

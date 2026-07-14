@@ -101,8 +101,14 @@ public:
 	void MoveStructure();
 
 	UFUNCTION()
+	bool SweepBox(UStaticMeshComponent* Mesh, const FVector& Start, const FVector& End, const FVector& BoxExtent, ECollisionChannel Channel, FHitResult& Hit);
+
+	UFUNCTION()
 	bool CheckOverlap();
 
+	UFUNCTION()
+	bool CheckInGround();
+	
 	UFUNCTION()
 	void AvailableColor(bool canBuild);
 	

@@ -24,9 +24,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<class UPanelWidget> structureTypeFilterPanel{};
-
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	TObjectPtr<class UPanelWidget> structureSortFilterPanel{};
 	
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<class USelectionDataWidget> selectionWidget{};
