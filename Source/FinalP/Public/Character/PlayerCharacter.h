@@ -149,6 +149,8 @@ protected:
 private:
 	bool bWantsToSprint = false;
 
+	float interactRaycastDistance = 600.f;
+
 	void UpdateStaminaUI();
 
 public:

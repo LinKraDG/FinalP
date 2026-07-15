@@ -267,21 +267,22 @@ void APlayerCharacter::OrbitalCameraChange()
 		default:
 			break;
 	}
-
 }
 
 void APlayerCharacter::ZoomInCameraChange()
 {
 	if (!IsValid(Controller)) return;
 
-	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength-20.f, 100.f, 1000.f);
+	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength-20.f, 100.f, 500.f);
+	interactRaycastDistance = FMath::Clamp(interactRaycastDistance-20.f, 300.f, 700.f);
 }
 
 void APlayerCharacter::ZoomOutCameraChange()
 {
 	if (!IsValid(Controller)) return;
 
-	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength+20.f, 100.f, 800.f);
+	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength+20.f, 100.f, 500.f);
+	interactRaycastDistance = FMath::Clamp(interactRaycastDistance+20.f, 300.f, 700.f);
 }
 
 void APlayerCharacter::Interact()
@@ -289,9 +290,9 @@ void APlayerCharacter::Interact()
 	FVector startLocation;
 	FRotator rotation;
 
-	GetActorEyesViewPoint(startLocation, rotation);
+	Controller->GetPlayerViewPoint(startLocation, rotation);
 
-	FVector endLocation = startLocation + (rotation.Vector() * 300.f);
+	FVector endLocation = startLocation + (rotation.Vector() * interactRaycastDistance);
 
 	FHitResult hitResult;
 	FCollisionQueryParams params;
@@ -308,7 +309,6 @@ void APlayerCharacter::Interact()
 			IInteractive::Execute_Interact(hitActor, this);
 		}
 	}
-
 }
 
 void APlayerCharacter::SelectMachineForLink()
