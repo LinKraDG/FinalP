@@ -19,6 +19,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Interactive.h"
 #include "Blueprint/UserWidget.h"
+#include "Items/ItemActor.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -89,6 +90,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	LookingItem();
+	
 	if (!IsValid(staminaComponent)) return;
 
 	const bool bMoving = GetVelocity().SizeSquared2D() > 100.f;
@@ -207,6 +210,54 @@ void APlayerCharacter::NoMoreMaterial()
 	EndBuild();
 }
 
+void APlayerCharacter::LookingItem()
+{
+	FVector startLocation;
+	FRotator rotation;
+
+	Controller->GetPlayerViewPoint(startLocation, rotation);
+
+	FVector endLocation = startLocation + (rotation.Vector() * interactRaycastDistance);
+
+	FHitResult hitResult;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
+	if (bHit)
+	{
+		AActor* hitActor = hitResult.GetActor();
+		if (!IsValid(hitActor)) return;
+
+		if (lookedItem != hitActor && lookedItem != nullptr)
+		{
+			AItemActor* lastItemActor = Cast<AItemActor>(lookedItem);
+			if (!IsValid(lastItemActor)) return;
+
+			lookedItem->staticMesh->SetRenderCustomDepth(false);
+			lookedItem = nullptr;
+		}
+
+		AItemActor* hitItemActor = Cast<AItemActor>(hitActor);
+		if (!IsValid(hitItemActor)) return;
+
+		
+		
+		lookedItem = hitItemActor;
+		
+		hitItemActor->staticMesh->SetRenderCustomDepth(true);
+		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Green, false, 0.5f, 0, 1.0f);
+	}
+	else
+	{
+		if (lookedItem != nullptr)
+		{
+			lookedItem->staticMesh->SetRenderCustomDepth(false);
+			lookedItem = nullptr;
+		}
+	}
+}
+
 void APlayerCharacter::Move(const FInputActionValue& actionValue)
 {
 	if (!IsValid(Controller)) return;
@@ -249,7 +300,7 @@ void APlayerCharacter::Look(const FInputActionValue& actionValue)
 	FVector2D lookVector = actionValue.Get<FVector2D>();
 
 	AddControllerYawInput(lookVector.X);
-	AddControllerPitchInput(lookVector.Y);
+	AddControllerPitchInput(-lookVector.Y);
 }
 
 void APlayerCharacter::OrbitalCameraChange()

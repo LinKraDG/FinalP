@@ -24,6 +24,9 @@ public:
 	TMap<int, int> constructionCost{};
 
 	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AItemActor> lookedItem{};
+
+	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AActor> interactiveItem{};
 
 	UPROPERTY(EditAnywhere, Category = Components)
@@ -177,5 +180,8 @@ public:
 
 	UFUNCTION()
 	void NoMoreMaterial();
+
+	UFUNCTION()
+	void LookingItem();
 	
 };
