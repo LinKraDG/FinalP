@@ -29,63 +29,48 @@ AItemActor::AItemActor()
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	/*FVector BoxMin;
-	FVector BoxMax;
-	staticMesh->GetLocalBounds(BoxMin, BoxMax);
-
-	// 4. Calcular el tamaño al doble y el centro
-	FVector Center = (BoxMin + BoxMax) / 2.0f;
-	FVector Extents = (BoxMax - BoxMin) / 2.0f; // Tamaño del radio original
-	FVector DoubleExtents = Extents * 2.0f;     // Tamaño al doble
-
-	// 5. Aplicar la posición local y el tamaño a la colisión
-	collision->SetRelativeLocation(Center);
-	collision->SetBoxExtent(DoubleExtents);
 	
-	collision->OnComponentBeginOverlap.AddDynamic(this, &AItemActor::OnBeginOverlap);
-	collision->OnComponentEndOverlap.AddDynamic(this, &AItemActor::OnEndOverlap);*/
 }
-//////////////////////////
-/*void AItemActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	APlayerCharacter* playerOverlap = Cast<APlayerCharacter>(OtherActor);
-	if (!IsValid(playerOverlap)) return;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Ha entrado!"));
+void AItemActor::DestroyResource()
+{
+	///////////////
+	this->Destroy();
 }
-//////////////////////////
-void AItemActor::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-	APlayerCharacter* playerOverlap = Cast<APlayerCharacter>(OtherActor);
-	if (!IsValid(playerOverlap)) return;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Ha salido!"));
-}*/
-
-void AItemActor::Interact_Implementation(AActor* actor)
+void AItemActor::Interact_Implementation(AActor* playerCharacter)
 {
-	player = Cast<APlayerCharacter>(actor);
+	player = Cast<APlayerCharacter>(playerCharacter);
 	if (!IsValid(player) || !IsValid(player->inventoryComponent))
 	{
 		return;
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Interactuando!"));
-
-	player->interactiveItem = this;
-
-	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
-
-	player->inventoryComponent->LoadItem(dataRow->item_ID, quantity);
+	
+	player->SetInteractItem(this);
+	
+	player->AnimationSelector();
 }
 
-void AItemActor::ReduceQuantity(int extract)
+/*void AItemActor::ReduceQuantity(int extract)
 {
 	quantity -= extract;
 	Interact_Implementation(player);
+}*/
+
+EItemType AItemActor::GetTypeResource()
+{
+	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
+	return dataRow->type;
+}
+
+void AItemActor::GiveResource()
+{
+	FItemData* dataRow = itemData.DataTable->FindRow<FItemData>(itemData.RowName,"");
+
+	player->inventoryComponent->LoadItem(dataRow->item_ID, FMath::RandRange(minQuantity, maxQuantity));
+	if (FMath::FRand() <= 0.25f) DestroyResource();
 }
 
 // Called every frame

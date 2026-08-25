@@ -419,6 +419,12 @@ void UConstructionComponent::PlaceStructure()
 	actBuilding = nullptr;
 	
 	CreateGhost();
+
+	for (const TPair<int, int>& pair : actStructureCost)
+	{
+		if (canContinue == false) continue;
+		canContinue = player->GetInventory()->GetItemAmount(pair.Key) == pair.Value;
+	}
 	
 	if (!canContinue)
 	{

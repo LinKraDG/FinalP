@@ -7,6 +7,8 @@
 #include "UI/PlayerWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PlayMontageCallbackProxy.h"
+#include "PlayMontageCallbackProxy.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Components/ConstructionComponent.h"
 #include "Character/Components/InventoryComponent.h"
@@ -31,10 +33,22 @@ APlayerCharacter::APlayerCharacter()
 
 	springArm = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
 	camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	
+	pickaxeMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PickaxeMesh"));
+	axeMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AxeMesh"));
+	
 	inventoryComponent = CreateDefaultSubobject<UInventoryComponent>("Inventory");
 	constructionComponent = CreateDefaultSubobject<UConstructionComponent>("Construction");
 	staminaComponent = CreateDefaultSubobject<UStaminaComponent>("Stamina");
 
+	
+	pickaxeMeshComponent->SetupAttachment(GetMesh(), TEXT("Pickaxe_Belt_Socket"));
+	axeMeshComponent->SetupAttachment(GetMesh(), TEXT("Axe_Belt_Socket"));
+	pickaxeMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	axeMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	pickaxeMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	axeMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	springArm->SetupAttachment(RootComponent);
 	springArm->TargetArmLength = 400.f;
 	springArm->bUsePawnControlRotation = true;
@@ -240,8 +254,6 @@ void APlayerCharacter::LookingItem()
 
 		AItemActor* hitItemActor = Cast<AItemActor>(hitActor);
 		if (!IsValid(hitItemActor)) return;
-
-		
 		
 		lookedItem = hitItemActor;
 		
@@ -256,6 +268,11 @@ void APlayerCharacter::LookingItem()
 			lookedItem = nullptr;
 		}
 	}
+}
+
+void APlayerCharacter::SetInteractItem(AItemActor* resource)
+{
+	interactiveItem = resource;
 }
 
 void APlayerCharacter::Move(const FInputActionValue& actionValue)
@@ -325,7 +342,7 @@ void APlayerCharacter::ZoomInCameraChange()
 	if (!IsValid(Controller)) return;
 
 	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength-20.f, 100.f, 500.f);
-	interactRaycastDistance = FMath::Clamp(interactRaycastDistance-20.f, 300.f, 700.f);
+	interactRaycastDistance = FMath::Clamp(interactRaycastDistance-20.f, 400.f, 800.f);
 }
 
 void APlayerCharacter::ZoomOutCameraChange()
@@ -333,7 +350,7 @@ void APlayerCharacter::ZoomOutCameraChange()
 	if (!IsValid(Controller)) return;
 
 	springArm->TargetArmLength = FMath::Clamp(springArm->TargetArmLength+20.f, 100.f, 500.f);
-	interactRaycastDistance = FMath::Clamp(interactRaycastDistance+20.f, 300.f, 700.f);
+	interactRaycastDistance = FMath::Clamp(interactRaycastDistance+20.f, 400.f, 800.f);
 }
 
 void APlayerCharacter::Interact()
@@ -473,4 +490,93 @@ void APlayerCharacter::EndBuild()
 	{
 		constructionPart = nullptr;
 	}
+}
+
+void APlayerCharacter::AnimationSelector()
+{
+	if (!IsValid(interactiveItem)) return;
+
+	switch (interactiveItem->GetTypeResource())
+	{
+		case EItemType::Wood:
+			actTool = axeMeshComponent;
+			actToolSocket = TEXT("Axe_Belt_Socket");
+			PlayMiningAnimation();
+			break;
+		case EItemType::Stone:
+		case EItemType::Metal:
+			actTool = pickaxeMeshComponent;
+			actToolSocket = TEXT("Pickaxe_Belt_Socket");
+			PlayMiningAnimation();
+			break;
+		
+	}
+}
+
+void APlayerCharacter::PlayMiningAnimation()
+{
+	if (!IsValid(miningMontage)) return;
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		float MontageLength = AnimInstance->Montage_Play(miningMontage, 1.0f);
+
+		if (MontageLength > 0.0f)
+		{
+			AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this,&APlayerCharacter::OnMontageNotifyBegin);
+			AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &APlayerCharacter::OnMontageNotifyBegin);
+		}
+	}
+	
+}
+
+void APlayerCharacter::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload)
+{
+	FAttachmentTransformRules AttachmentRules(
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::KeepWorld,
+		true
+	);
+
+	if (NotifyName == TEXT("Equip"))
+	{
+		if (!IsValid(actTool)) return;
+		if (!IsValid(GetMesh())) return;
+		actTool->AttachToComponent(GetMesh(), AttachmentRules, TEXT("Hand_Tool_Socket"));
+
+		APlayerController* playerController = Cast<APlayerController>(Controller);
+		if (!IsValid(playerController)) return;
+		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+		{
+			subsystem->RemoveMappingContext(defaultMappingContext);
+		}
+	}
+	if (NotifyName == TEXT("Unequip"))
+	{
+		if (!IsValid(actTool)) return;
+		if (!IsValid(GetMesh())) return;
+		actTool->AttachToComponent(GetMesh(), AttachmentRules, actToolSocket);
+		actTool = nullptr;
+		actToolSocket = NAME_None;
+
+		interactiveItem->GiveResource();
+
+		interactiveItem = nullptr;
+		
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (IsValid(AnimInstance))
+		{
+			AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this,&APlayerCharacter::OnMontageNotifyBegin);
+		}
+
+		APlayerController* playerController = Cast<APlayerController>(Controller);
+		if (!IsValid(playerController)) return;
+		if (UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+		{
+			subsystem->AddMappingContext(defaultMappingContext, 0);
+		}
+	}
+	
 }

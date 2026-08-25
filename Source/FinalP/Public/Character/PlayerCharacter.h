@@ -23,11 +23,12 @@ public:
 
 	TMap<int, int> constructionCost{};
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AItemActor> lookedItem{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tools")
+	TObjectPtr<class UStaticMeshComponent> pickaxeMeshComponent;
 
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AActor> interactiveItem{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tools")
+	TObjectPtr<class UStaticMeshComponent> axeMeshComponent;
+
 
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UInventoryComponent> inventoryComponent{};
@@ -37,6 +38,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<UStaminaComponent> staminaComponent{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	TObjectPtr<class UAnimMontage> miningMontage{};
 
 	UPROPERTY(EditAnywhere, Category = Movement)
 	float walkSpeed = 600.f;
@@ -53,8 +57,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Link")
 	TObjectPtr<class AMachineBase> pendingLinkSource{};
 
-	UFUNCTION()
-	void PauseGame();
 
 protected:
 	// Called when the game starts or when spawned
@@ -149,12 +151,32 @@ protected:
 	void PlaceStructure();
 	void EndBuild();
 
+	//Anim functions-------------------------------
+	
+	void PlayMiningAnimation();
+
+	UFUNCTION()
+	void OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointPayload);
+	
+
 private:
 	bool bWantsToSprint = false;
 
 	float interactRaycastDistance = 600.f;
 
 	void UpdateStaminaUI();
+	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AItemActor> lookedItem{};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AItemActor> interactiveItem{};
+
+	UPROPERTY()
+	TObjectPtr<class UStaticMeshComponent> actTool;
+
+	UPROPERTY()
+	FName actToolSocket = NAME_None;
 
 public:
 	// Called every frame
@@ -168,6 +190,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	UConstructionComponent* GetConstruction();
+	
+	UFUNCTION()
+	void PauseGame();
 
 	UFUNCTION()
 	void SetConstructionMode(TSubclassOf<AConstructionPart> part, TMap<int, int> cost);
@@ -183,5 +208,13 @@ public:
 
 	UFUNCTION()
 	void LookingItem();
-	
+
+	UFUNCTION()
+	void SetInteractItem(AItemActor* resource);
+
+
+	//Anim public functions-------------
+	UFUNCTION()
+	void AnimationSelector();
+
 };

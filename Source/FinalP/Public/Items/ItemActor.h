@@ -35,22 +35,32 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class APlayerCharacter> player{};
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//int quantity;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int quantity;
-/////////////////////////
-	//UFUNCTION()
-	//void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-///////////////////////////////
-	//UFUNCTION()
-	//void OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	int minQuantity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int maxQuantity;
+
+private:
+
+	void DestroyResource();
 	
 public:
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;
 
-	virtual void Interact_Implementation(AActor* actor) override;
+	virtual void Interact_Implementation(AActor* playerCharacter) override;
+
+	//UFUNCTION()
+	//void ReduceQuantity(int extract);
 
 	UFUNCTION()
-	void ReduceQuantity(int extract);
+	EItemType GetTypeResource();
+
+	UFUNCTION()
+	void GiveResource();
 
 };
