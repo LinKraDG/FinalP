@@ -72,6 +72,9 @@ protected:
 	
 	//Default Inputs---------------------------------------
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
+	TObjectPtr<class UInputMappingContext> pauseMappingContext{};
+
+	UPROPERTY(EditAnywhere, Category = DefaultInput)
 	TObjectPtr<class UInputMappingContext> defaultMappingContext{};
 
 	UPROPERTY(EditAnywhere, Category = DefaultInput)
@@ -128,6 +131,9 @@ protected:
 	TObjectPtr<class UInputAction> placeStructureAction{};
 
 	UPROPERTY(EditAnywhere, Category = BuildInput)
+	TObjectPtr<class UInputAction> cancelBuildAction{};
+
+	UPROPERTY(EditAnywhere, Category = BuildInput)
 	TObjectPtr<class UInputAction> endBuildAction{};
 	
 	//Default Input Functions------------------------
@@ -149,6 +155,7 @@ protected:
 	void RotateLeftStructure();
 	void RotateRightStructure();
 	void PlaceStructure();
+	void CancelBuild();
 	void EndBuild();
 
 	//Anim functions-------------------------------
@@ -202,9 +209,6 @@ public:
 
 	UFUNCTION()
 	void ChangeToDefaultMappingContext();
-
-	UFUNCTION()
-	void NoMoreMaterial();
 
 	UFUNCTION()
 	void LookingItem();

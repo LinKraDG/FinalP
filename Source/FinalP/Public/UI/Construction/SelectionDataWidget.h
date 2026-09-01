@@ -31,7 +31,10 @@ protected:
 	TObjectPtr<class UTextBlock> structureNameText{};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<class UBorder> structureBorder{};
+	TObjectPtr<class UImage> structureImage{};
+
+	//UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	//TObjectPtr<class UBorder> structureBorder{};
 	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> descriptionText{};

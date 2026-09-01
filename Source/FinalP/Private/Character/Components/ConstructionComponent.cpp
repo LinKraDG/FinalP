@@ -428,7 +428,7 @@ void UConstructionComponent::PlaceStructure()
 	
 	if (!canContinue)
 	{
-		player->NoMoreMaterial();
+		EndBuild();
 	}
 }
 
@@ -438,6 +438,7 @@ void UConstructionComponent::EndBuild()
 	{
 		actBuilding->Destroy();
 		previewMesh->DestroyComponent();
+		player->ChangeToDefaultMappingContext();
 	}
 	else
 	{
@@ -445,6 +446,7 @@ void UConstructionComponent::EndBuild()
 	}
 	
 	if (actBuilding != nullptr) actBuilding = nullptr;
+	if (previewMesh != nullptr) previewMesh = nullptr;
 }
 
 

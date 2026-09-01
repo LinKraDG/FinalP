@@ -19,11 +19,17 @@ private:
 	UPROPERTY(EditAnywhere)
 	EStructureType type;
 
+	UPROPERTY(EditAnywhere)
+	FLinearColor structureTypeFilterColor;
+
 protected:
 	virtual void NativeOnInitialized() override;
 
 	//UPROPERTY(EditAnywhere)
 	//TObjectPtr<class APlayerHUD> hud{};
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	TObjectPtr<class UBorder> typeBorderColored{};
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UBorder> typeFrame{};
@@ -52,5 +58,8 @@ protected:
 
 	UFUNCTION()
 	void SetFrameText();
+	
+	UFUNCTION()
+	void SetColor();
 	
 };

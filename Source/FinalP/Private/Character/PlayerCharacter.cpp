@@ -95,6 +95,7 @@ void APlayerCharacter::BeginPlay()
 	UEnhancedInputLocalPlayerSubsystem* subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer());
 	if (!IsValid(subsystem)) return;
 
+	subsystem->AddMappingContext(pauseMappingContext, 0);
 	subsystem->AddMappingContext(defaultMappingContext, 0);
 
 }
@@ -161,6 +162,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EDefaultInputComponent->BindAction(rotateLeftStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateLeftStructure);
 	EDefaultInputComponent->BindAction(rotateRightStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::RotateRightStructure);
 	EDefaultInputComponent->BindAction(placeStructureAction, ETriggerEvent::Triggered, this, &APlayerCharacter::PlaceStructure);
+	EDefaultInputComponent->BindAction(cancelBuildAction, ETriggerEvent::Triggered, this, &APlayerCharacter::CancelBuild);
 	EDefaultInputComponent->BindAction(endBuildAction, ETriggerEvent::Triggered, this, &APlayerCharacter::EndBuild);
 
 	/*UEnhancedInputComponent* EBuildInputComponent = Cast<UEnhancedInputComponent>(buildMappingContext);
@@ -191,6 +193,8 @@ void APlayerCharacter::SetConstructionMode(TSubclassOf<AConstructionPart> part, 
 
 	constructionComponent->CreateStructure(constructionPart, cost);
 
+	ChangeToBuildMappingContext();
+
 	OpenCloseBuildMenu();
 
 	//CreateStructure();
@@ -217,11 +221,6 @@ void APlayerCharacter::ChangeToDefaultMappingContext()
 	if (!IsValid(subsystem)) return;
 
 	subsystem->RemoveMappingContext(buildMappingContext);
-}
-
-void APlayerCharacter::NoMoreMaterial()
-{
-	EndBuild();
 }
 
 void APlayerCharacter::LookingItem()
@@ -435,8 +434,6 @@ void APlayerCharacter::BuildMenu()
 	if (!IsValid(Controller)) return;
 	if (constructionPart != nullptr) constructionPart = nullptr;
 
-	ChangeToBuildMappingContext();
-
 	OpenCloseBuildMenu();
 }
 
@@ -476,6 +473,16 @@ void APlayerCharacter::PlaceStructure()
 
 	constructionComponent->PlaceStructure();
 	constructionComponent->CreateStructure(constructionPart, constructionCost);
+}
+
+void APlayerCharacter::CancelBuild()
+{
+	constructionComponent->EndBuild();
+
+	if (constructionPart != nullptr)
+	{
+		constructionPart = nullptr;
+	}
 }
 
 void APlayerCharacter::EndBuild()

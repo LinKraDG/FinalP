@@ -5,6 +5,7 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Character/Components/ConstructionComponent.h"
+#include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 
@@ -14,6 +15,7 @@ void UTypeFilterWidget::NativeOnInitialized()
 	
 	typeFilterButton->OnPressed.AddUniqueDynamic(this, &UTypeFilterWidget::OnFilterButtonPressed);
 	SetFrameText();
+	SetColor();
 }
 
 //Filter by the type of the structures
@@ -32,5 +34,10 @@ void UTypeFilterWidget::SetFrameText()
 {
 	typeTextFrame->SetText(textTypeFrame);
 	typeText->SetText(textType);
+}
+
+void UTypeFilterWidget::SetColor()
+{
+	typeBorderColored->SetBrushColor(structureTypeFilterColor);
 }
 

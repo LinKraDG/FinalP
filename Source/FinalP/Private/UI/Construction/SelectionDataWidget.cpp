@@ -8,6 +8,7 @@
 #include "Character/Components/InventoryComponent.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/VerticalBox.h"
@@ -61,7 +62,9 @@ void USelectionDataWidget::SelectStructure(FConstructionData structureData)
 	selectedStructure = structureData.structure;
 
 	structureNameText->SetText(FText::FromString(structureData.name));
-	structureBorder->SetBrushFromTexture(structureData.image);
+	structureImage->SetBrushFromTexture(structureData.image);
+	structureImage->SetRenderScale(FVector2D(1.15f,1.15f));
+	if (!structureImage->IsVisible()) structureImage->SetVisibility(ESlateVisibility::Visible);
 	descriptionText->SetText(FText::FromString(structureData.desciption));
 
 	
