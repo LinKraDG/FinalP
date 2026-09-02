@@ -408,6 +408,7 @@ void UConstructionComponent::PlaceStructure()
 	}
 	
 	previewMesh->DestroyComponent();
+	previewMesh = nullptr;
 
 	actBuilding->SetActorRotation(structureRotator);
 	actBuilding->SetActorLocation(structurePlace);
@@ -418,8 +419,7 @@ void UConstructionComponent::PlaceStructure()
 
 	actBuilding = nullptr;
 	
-	CreateGhost();
-
+	
 	for (const TPair<int, int>& pair : actStructureCost)
 	{
 		if (canContinue == false) continue;
@@ -429,7 +429,11 @@ void UConstructionComponent::PlaceStructure()
 	if (!canContinue)
 	{
 		EndBuild();
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("¡Sale del EndBuild!"));
+		return;
 	}
+
+	CreateGhost();
 }
 
 void UConstructionComponent::EndBuild()
@@ -447,6 +451,7 @@ void UConstructionComponent::EndBuild()
 	
 	if (actBuilding != nullptr) actBuilding = nullptr;
 	if (previewMesh != nullptr) previewMesh = nullptr;
+	actStructureCost.Reset();
 }
 
 

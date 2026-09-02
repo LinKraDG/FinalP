@@ -135,6 +135,15 @@ void APlayerCharacter::UpdateStaminaUI()
 	widget->SetStaminaPercent(staminaComponent->GetStaminaPercent());
 }
 
+EActorsClassify APlayerCharacter::GetActorClassify(AActor* actor)
+{
+	EActorsClassify classify = EActorsClassify::None;
+	
+	if (actor->IsA(AItemActor::StaticClass())) return classify = EActorsClassify::Item;
+	if (actor->IsA(AConstructionPart::StaticClass())) return classify = EActorsClassify::Construction;
+	return classify;
+}
+
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -237,34 +246,91 @@ void APlayerCharacter::LookingItem()
 	params.AddIgnoredActor(this);
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECollisionChannel::ECC_Visibility, params);
+	AItemActor* tempItemActor = nullptr;
+	AConstructionPart* tempConstructionActor = nullptr;
 	if (bHit)
 	{
 		AActor* hitActor = hitResult.GetActor();
 		if (!IsValid(hitActor)) return;
-
-		if (lookedItem != hitActor && lookedItem != nullptr)
+		
+		if (lookedActor != hitActor && lookedActor != nullptr)
 		{
-			AItemActor* lastItemActor = Cast<AItemActor>(lookedItem);
-			if (!IsValid(lastItemActor)) return;
+			
+			switch (GetActorClassify(lookedActor))
+			{
+				case EActorsClassify::Item:
+					tempItemActor = Cast<AItemActor>(lookedActor);
+					if (!IsValid(tempItemActor)) return;
 
-			lookedItem->staticMesh->SetRenderCustomDepth(false);
-			lookedItem = nullptr;
+					tempItemActor->staticMesh->SetRenderCustomDepth(false);
+					tempItemActor = nullptr;
+					lookedActor = nullptr;
+					break;
+				case EActorsClassify::Construction:
+					tempConstructionActor = Cast<AConstructionPart>(lookedActor);
+					if (!IsValid(tempConstructionActor)) return;
+
+					tempConstructionActor->GetStructureMesh()->SetRenderCustomDepth(false);
+					tempConstructionActor = nullptr;
+					lookedActor = nullptr;
+					break;
+				case EActorsClassify::None:
+					return;
+					break;
+			}
+			
 		}
-
-		AItemActor* hitItemActor = Cast<AItemActor>(hitActor);
-		if (!IsValid(hitItemActor)) return;
 		
-		lookedItem = hitItemActor;
+		switch (GetActorClassify(hitActor))
+		{
+			case EActorsClassify::Item:
+				tempItemActor = Cast<AItemActor>(hitActor);
+				if (!IsValid(tempItemActor)) return;
 		
-		hitItemActor->staticMesh->SetRenderCustomDepth(true);
+				lookedActor = tempItemActor;
+		
+				tempItemActor->staticMesh->SetRenderCustomDepth(true);
+				tempItemActor = nullptr;
+				break;
+			case EActorsClassify::Construction:
+				tempConstructionActor = Cast<AConstructionPart>(hitActor);
+				if (!IsValid(tempConstructionActor)) return;
+		
+				lookedActor = tempConstructionActor;
+		
+				tempConstructionActor->GetStructureMesh()->SetRenderCustomDepth(true);
+				tempConstructionActor = nullptr;
+				break;
+			case EActorsClassify::None:
+				return;
+				break;
+		}
+		
+		
 		//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Green, false, 0.5f, 0, 1.0f);
 	}
 	else
 	{
-		if (lookedItem != nullptr)
+		if (lookedActor != nullptr)
 		{
-			lookedItem->staticMesh->SetRenderCustomDepth(false);
-			lookedItem = nullptr;
+			switch (GetActorClassify(lookedActor))
+			{
+				case EActorsClassify::Item:
+					tempItemActor = Cast<AItemActor>(lookedActor);
+					tempItemActor->staticMesh->SetRenderCustomDepth(false);
+					tempItemActor = nullptr;
+					break;
+				case EActorsClassify::Construction:
+					tempConstructionActor = Cast<AConstructionPart>(lookedActor);
+					tempConstructionActor->GetStructureMesh()->SetRenderCustomDepth(false);
+					tempConstructionActor = nullptr;
+					break;
+				case EActorsClassify::None:
+					return;
+					break;
+			}
+			
+			lookedActor = nullptr;
 		}
 	}
 }
@@ -472,7 +538,7 @@ void APlayerCharacter::PlaceStructure()
 	if (!IsValid(Controller)) return;
 
 	constructionComponent->PlaceStructure();
-	constructionComponent->CreateStructure(constructionPart, constructionCost);
+	//constructionComponent->CreateStructure(constructionPart, constructionCost);
 }
 
 void APlayerCharacter::CancelBuild()

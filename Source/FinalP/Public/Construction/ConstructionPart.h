@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enums/ActorsClassify.h"
 #include "Structs/ConstructionData.h"
 #include "GameFramework/Actor.h"
 #include "ConstructionPart.generated.h"
@@ -18,6 +19,9 @@ public:
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	//FConstructionData structureData{};
+
+
+	
 private:
 	bool validConstruct;
 	int overlapCounter;
@@ -30,12 +34,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UBoxComponent> boxCollision{};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UStaticMeshComponent> baseMeshComponent{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UMaterialInterface> originalMaterial{};
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	TObjectPtr<class UStaticMeshComponent> baseMeshComponent{};
 
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

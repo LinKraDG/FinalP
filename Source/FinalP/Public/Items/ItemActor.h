@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enums/ActorsClassify.h"
 #include "Structs/ItemData.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Interactive.h"

@@ -99,6 +99,8 @@ UStaticMeshComponent* AConstructionPart::GetStructureMesh()
 	return baseMeshComponent;
 }
 
+
+
 // Called when the game starts or when spawned
 void AConstructionPart::BeginPlay()
 {

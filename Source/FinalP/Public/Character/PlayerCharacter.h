@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Enums/ActorsClassify.h"
 #include "PlayerCharacter.generated.h"
 
 class UStaminaComponent;
@@ -28,8 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tools")
 	TObjectPtr<class UStaticMeshComponent> axeMeshComponent;
-
-
+	
 	UPROPERTY(EditAnywhere, Category = Components)
 	TObjectPtr<class UInventoryComponent> inventoryComponent{};
 
@@ -174,7 +174,10 @@ private:
 	void UpdateStaminaUI();
 	
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class AItemActor> lookedItem{};
+	TObjectPtr<class AActor> lookedActor{};
+
+	UFUNCTION()
+	EActorsClassify GetActorClassify(AActor* actor);
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class AItemActor> interactiveItem{};
