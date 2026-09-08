@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Inventory/InventoryWidget.h"
+#include "Inventory/ContainerInventory/ContainerWidget.h"
 #include "GameFramework/HUD.h"
 #include "Pause/PauseMenuWidget.h"
 #include "PlayerHUD.generated.h"
@@ -29,10 +30,13 @@ private:
 	UPROPERTY()
 	UInventoryWidget* inventoryWidget = nullptr;
 
-	bool bMachineWidgetOpen = false;
+	UPROPERTY()
+	UContainerWidget* containerWidget = nullptr;
 
 	UPROPERTY()
 	UPauseMenuWidget* pauseWidget = nullptr;
+
+	bool bMachineWidgetOpen = false;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
@@ -43,6 +47,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
 	TSubclassOf<UInventoryWidget> inventoryWidgetClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = Settings)
+	TSubclassOf<UContainerWidget> containerWidgetClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = Settings)
 	TSubclassOf<UPauseMenuWidget> pauseWidgetClass = nullptr;
@@ -78,4 +85,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UStructureMenuWidget* GetStructureWidget();
+
+	//UFUNCTION(BlueprintCallable)
+	
+	UFUNCTION(BlueprintCallable)
+	void OpenCloseContainerInventory(APlayerCharacter* player = nullptr, AOrganizationConstruct* container = nullptr);
+	
 };

@@ -17,11 +17,24 @@ class FINALP_API UInventoryWidget : public UUserWidget
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<class UPanelWidget> itemsPanel{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUnicItem> itemsWidget;
 	
 public:
-	UFUNCTION(BlueprintCallable)
-	UPanelWidget* GetItemsPanel();
 
 	UFUNCTION(BlueprintCallable)
 	void ShowHideOptions(int id);
+
+	UFUNCTION()
+	void ItemSlotCreation();
+
+	UFUNCTION()
+	void CreateItemSlot(int slotID, UDataTable* itemsDataTable, int itemID, int itemQuantity);
+
+	UFUNCTION()
+	void CreateEmptyItemSlot(int slotID);
+
+	UFUNCTION()
+	void RemoveSlots();
 };

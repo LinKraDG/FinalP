@@ -6,6 +6,7 @@
 #include "ProjectGameMode.h"
 #include "UI/PlayerWidget.h"
 #include "UI/Construction/StructureMenuWidget.h"
+#include "UI/Inventory/ContainerInventory/ContainerWidget.h"
 
 void APlayerHUD::BeginPlay()
 {
@@ -14,11 +15,13 @@ void APlayerHUD::BeginPlay()
 	if (!IsValid(playerWidgetClass)) return;
 	if (!IsValid(constructionMenuWidgetClass)) return;
 	if (!IsValid(inventoryWidgetClass)) return;
+	if (!IsValid(containerWidgetClass)) return;
 	if (!IsValid(pauseWidgetClass)) return;
 
 	playerWidget = CreateWidget<UPlayerWidget>(GetWorld(), playerWidgetClass);
 	constructionMenuWidget = CreateWidget<UStructureMenuWidget>(GetWorld(), constructionMenuWidgetClass);
 	inventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), inventoryWidgetClass);
+	containerWidget = CreateWidget<UContainerWidget>(GetWorld(), containerWidgetClass);
 	pauseWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), pauseWidgetClass);
 	
 	playerWidget->AddToViewport();
@@ -28,6 +31,9 @@ void APlayerHUD::BeginPlay()
 	
 	inventoryWidget->AddToViewport();
 	inventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+	
+	containerWidget->AddToViewport();
+	containerWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 	pauseWidget->AddToViewport();
 	pauseWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -45,12 +51,16 @@ void APlayerHUD::OpenCloseConstructionMenu()
 
 	if (!constructionMenuWidget->IsVisible())
 	{
+		if (inventoryWidget->IsVisible()) return;
+		if (containerWidget->IsVisible()) return;
+		if (pauseWidget->IsVisible()) return;
+		
 		SetPlayerWidgetVisible(false);
 		constructionMenuWidget->SetVisibility(ESlateVisibility::Visible);
 
 		controller->SetShowMouseCursor(true);
 		controller->SetInputMode(FInputModeGameAndUI());
-		controller->SetPause(true);
+		//controller->SetPause(true);
 	}
 	else
 	{
@@ -62,7 +72,7 @@ void APlayerHUD::OpenCloseConstructionMenu()
 
 		controller->SetShowMouseCursor(false);
 		controller->SetInputMode(FInputModeGameOnly());
-		controller->SetPause(false);
+		//controller->SetPause(false);
 	}
 }
 
@@ -77,12 +87,18 @@ void APlayerHUD::OpenCloseInventory()
 
 	if (!inventoryWidget->IsVisible())
 	{
+		if (pauseWidget->IsVisible()) return;
+		if (containerWidget->IsVisible()){ OpenCloseContainerInventory(); return;}
+		if (constructionMenuWidget->IsVisible()) return;
+		
 		SetPlayerWidgetVisible(false);
 		inventoryWidget->SetVisibility(ESlateVisibility::Visible);
+		inventoryWidget->RemoveSlots();
+		inventoryWidget->ItemSlotCreation();
 
 		controller->SetShowMouseCursor(true);
 		controller->SetInputMode(FInputModeGameAndUI());
-		controller->SetPause(true);
+		//controller->SetPause(true);
 	}
 	else
 	{
@@ -94,7 +110,7 @@ void APlayerHUD::OpenCloseInventory()
 
 		controller->SetShowMouseCursor(false);
 		controller->SetInputMode(FInputModeGameOnly());
-		controller->SetPause(false);
+		//controller->SetPause(false);
 	}
 }
 
@@ -140,8 +156,11 @@ void APlayerHUD::OpenClosePauseMenu()
 	APlayerController* controller = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if (!IsValid(controller)) return;
 
-	if (playerWidget->IsVisible())
+	if (!pauseWidget->IsVisible())
 	{
+		if (inventoryWidget->IsVisible()){ OpenCloseInventory(); return;}
+		if (containerWidget->IsVisible()){ OpenCloseContainerInventory(); return;}
+		if (constructionMenuWidget->IsVisible()){ OpenCloseConstructionMenu(); return;}
 		playerWidget->SetVisibility(ESlateVisibility::Collapsed);
 		pauseWidget->SetVisibility(ESlateVisibility::Visible);
 
@@ -168,4 +187,45 @@ UInventoryWidget* APlayerHUD::GetInventoryWidget()
 UStructureMenuWidget* APlayerHUD::GetStructureWidget()
 {
 	return constructionMenuWidget;
+}
+
+void APlayerHUD::OpenCloseContainerInventory(APlayerCharacter* player, AOrganizationConstruct* container)
+{
+	if (!IsValid(playerWidget)) return;
+	if (!IsValid(containerWidget)) return;
+	if (bMachineWidgetOpen) return;
+
+	APlayerController* controller = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!IsValid(controller)) return;
+
+	if (!containerWidget->IsVisible())
+	{
+		if (inventoryWidget->IsVisible()) return;
+		if (pauseWidget->IsVisible()) return;
+		if (constructionMenuWidget->IsVisible()) return;
+		
+		if (!IsValid(player)) return;
+		if (!IsValid(container)) return;
+		SetPlayerWidgetVisible(false);
+		containerWidget->SetVisibility(ESlateVisibility::Visible);
+		containerWidget->RemoveSlots();
+		containerWidget->ItemSlotCreation(player, container);
+
+		controller->SetShowMouseCursor(true);
+		controller->SetInputMode(FInputModeGameAndUI());
+		//controller->SetPause(true);
+	}
+	else
+	{
+		containerWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (!IsAnyMenuOpen())
+		{
+			SetPlayerWidgetVisible(true);
+		}
+
+		controller->SetShowMouseCursor(false);
+		controller->SetInputMode(FInputModeGameOnly());
+		//controller->SetPause(false);
+	}
+	
 }

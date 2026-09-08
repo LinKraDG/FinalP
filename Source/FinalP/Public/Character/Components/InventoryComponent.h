@@ -67,14 +67,21 @@ public:
 	void UnloadItem(FItemData item, int index);
 
 	UFUNCTION()
+	UDataTable* GetItemDataTable();
+
+	UFUNCTION()
+	TMap<int, FInventoryItem> GetInventoryData();
+	
+	UFUNCTION()
 	FItemData GetItem(int index);
 
 	UFUNCTION()
 	int GetItemAmount(int ID);
 
-	UFUNCTION()
-	void PrintInventory();
+	//UFUNCTION()
+	//void PrintInventory();
 
 	UFUNCTION()
 	void NotifyChanges(FInventoryItem item);
+
 };

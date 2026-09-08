@@ -305,7 +305,7 @@ bool UConstructionComponent::CheckOverlap()
 
 	previewMesh->GetLocalBounds(origin, extent);
 
-	extent *= 0.40f;
+	extent *= 0.30f;
 
 	FHitResult Hit;
 

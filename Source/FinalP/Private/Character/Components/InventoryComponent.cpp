@@ -117,7 +117,7 @@ int32 UInventoryComponent::AddItem(FItemData item, int32 amount)
 		remaining -= toAdd;
 		NotifyChanges(pair.Value);
 	}
-	PrintInventory();
+	//PrintInventory();
 	return remaining;
 }
 
@@ -154,7 +154,7 @@ bool UInventoryComponent::RemoveItem(int32 itemId, int32 amount)
 		NotifyChanges(pair.Value);
 	}
 
-	PrintInventory();
+	//PrintInventory();
 	return true;
 }
 
@@ -171,6 +171,16 @@ void UInventoryComponent::UnloadItem(FItemData item, int index)
 	FInventoryItem removed = *IItem;
 	*IItem = FInventoryItem();
 	NotifyChanges(removed);
+}
+
+UDataTable* UInventoryComponent::GetItemDataTable()
+{
+	return itemDataTable;
+}
+
+TMap<int, FInventoryItem> UInventoryComponent::GetInventoryData()
+{
+	return inventoryData;
 }
 
 FItemData UInventoryComponent::GetItem(int index)
@@ -199,7 +209,7 @@ int UInventoryComponent::GetItemAmount(int ID)
 	return 0;
 }
 
-void UInventoryComponent::PrintInventory()
+/*void UInventoryComponent::PrintInventory()
 {
 	APlayerHUD* hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	UPanelWidget* panel = Cast<UPanelWidget>(hud->GetInventoryWidget()->GetItemsPanel());
@@ -244,7 +254,7 @@ void UInventoryComponent::PrintInventory()
 		
 		index++;
 	}
-}
+}*/
 
 void UInventoryComponent::NotifyChanges(FInventoryItem item)
 {

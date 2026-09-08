@@ -5,6 +5,7 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Character/Components/InventoryComponent.h"
+#include "UI/PlayerHUD.h"
 
 
 // Sets default values
@@ -28,8 +29,22 @@ void AOrganizationConstruct::Interact_Implementation(AActor* playerCharacter)
 	APlayerCharacter* player = Cast<APlayerCharacter>(playerCharacter);
 
 	if (!IsValid(player) || !IsValid(player->inventoryComponent)) return;
-
 	
+	APlayerHUD* hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	/*if (hud->->IsVisible()){
+		CloseWidget();
+	}
+	else{
+		OpenWidget();
+	}*/
+	
+	hud->OpenCloseContainerInventory(player, this);
+}
+
+UInventoryComponent* AOrganizationConstruct::GetInventory()
+{
+	return inventoryComponent;
 }
 
 // Called every frame

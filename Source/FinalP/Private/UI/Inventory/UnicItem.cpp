@@ -8,6 +8,8 @@
 #include "Character/Components/InventoryComponent.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
 #include "Structs/ItemData.h"
 #include "UI/PlayerHUD.h"
 
@@ -48,7 +50,25 @@ void UUnicItem::SetNoneImage()
 void UUnicItem::SetFrameImage()
 {
 	frame->SetVisibility(ESlateVisibility::Visible);
-	frame->SetBrushFromTexture(imageItemFrame);
+}
+
+void UUnicItem::SetData(int slot_ID, FItemData data, int itemQuantity)
+{
+	itemData = data;
+	ID = slot_ID;
+	frame->SetVisibility(ESlateVisibility::Visible);
+	item->SetBrushFromTexture(data.image);
+	quantity->SetText(FText::AsNumber(itemQuantity));
+	frame->SetBrushFromTexture(data.image);
+	item->SetVisibility(ESlateVisibility::Visible);
+	options->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UUnicItem::SetEmptyData(int slot_ID)
+{
+	ID = slot_ID;
+	item->SetVisibility(ESlateVisibility::Hidden);
+	options->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUnicItem::OnItemButtonPressed()
@@ -75,7 +95,7 @@ void UUnicItem::OnDropButtonPressed()
 
 	hud->GetInventoryWidget()->ShowHideOptions(ID);
 
-	inventory->PrintInventory();
+	//inventory->PrintInventory();
 
 	hud = nullptr;
 }

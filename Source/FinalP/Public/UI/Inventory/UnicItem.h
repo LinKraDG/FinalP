@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Structs/ItemData.h"
 #include "UnicItem.generated.h"
 
 /**
@@ -14,11 +15,12 @@ class FINALP_API UUnicItem : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
 
+private:
+	FItemData itemData;
+	
 	UPROPERTY(EditAnywhere)
 	int ID;
-	
 protected:
 	
 	virtual void NativeOnInitialized() override;
@@ -79,5 +81,11 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void SetFrameImage();
+
+	UFUNCTION()
+	void SetData(int slot_ID, FItemData data, int itemQuantity);
+
+	UFUNCTION()
+	void SetEmptyData(int slot_ID);
 	
 };

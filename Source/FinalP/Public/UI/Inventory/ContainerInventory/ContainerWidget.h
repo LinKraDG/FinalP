@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/PlayerCharacter.h"
+#include "Construction/Child/OrganizationConstruct.h"
 #include "ContainerWidget.generated.h"
 
 /**
@@ -20,6 +22,18 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<class UPanelWidget> containerItemsPanel{};
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUnicContainerWidget> itemsWidget;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDataTable> itemsDataTable{};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class APlayerCharacter> player{};
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class AOrganizationConstruct> container{};
+
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UButton> playerToContainerButton{};
@@ -27,13 +41,37 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UButton> containerToPlayerButton{};
 
+public:
+
+	virtual void NativeOnInitialized() override;
+	
 	UFUNCTION()
-	void SlotItemsCreation();
+	void ItemSlotCreation(APlayerCharacter* playerI, AOrganizationConstruct* containerI);
 
 	UFUNCTION()
-	void PrintPlayerInventory();
+	void CreatePlayerItemSlot(int slotID, int itemID, int itemQuantity);
 
 	UFUNCTION()
-	void PrintContainerInventory();
+	void CreateContainerItemSlot(int slotID, int itemID, int itemQuantity);
+
+	UFUNCTION()
+	void CreatePlayerEmptyItemSlot(int slotID);
+
+	UFUNCTION()
+	void CreateContainerEmptyItemSlot(int slotID);
+
+	UFUNCTION()
+	void RemoveSlots();
+
+	//PlayerToContainer
+	UFUNCTION()
+	void OnPToCButtonPressed();
+
+	//ContainerToPlayer
+	UFUNCTION()
+	void OnCToPButtonPressed();
+
+	//UFUNCTION()
+	void RePrintInventories();
 	
 };

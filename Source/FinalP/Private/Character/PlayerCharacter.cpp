@@ -492,7 +492,7 @@ void APlayerCharacter::InventoryMenu()
 
 	if (!IsValid(inventoryComponent)) return;
 
-	inventoryComponent->PrintInventory();
+	//inventoryComponent->PrintInventory();
 }
 
 void APlayerCharacter::BuildMenu()

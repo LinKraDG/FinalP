@@ -28,4 +28,7 @@ public:
 	//virtual void Tick(float DeltaTime) override;
 
 	virtual void Interact_Implementation(AActor* playerCharacter) override;
+
+	UFUNCTION(BlueprintPure)
+	UInventoryComponent* GetInventory();
 };
