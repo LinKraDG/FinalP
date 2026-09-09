@@ -85,9 +85,6 @@ public:
 	UFUNCTION()
 	void UpdateRecipeSlots();
 	void UpdateFilterRecipeSlots(EStructureType type);
-	
-	UFUNCTION()//debug
-	void PrintUnlockedRecipes();
 
 	//Construction functions
 

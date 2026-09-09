@@ -45,8 +45,6 @@ void AItemActor::Interact_Implementation(AActor* playerCharacter)
 	{
 		return;
 	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("¡Interactuando!"));
 	
 	player->SetInteractItem(this);
 	

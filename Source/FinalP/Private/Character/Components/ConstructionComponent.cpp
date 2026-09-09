@@ -48,9 +48,7 @@ void UConstructionComponent::BeginPlay()
 	LoadRecipes();
 	//Create slots for unlocked recipes
 	UpdateRecipeSlots();
-
-	//Debug
-	PrintUnlockedRecipes();
+	
 }
 
 //Load all recipes by the data table and the unlocked are included to his array
@@ -147,16 +145,6 @@ void UConstructionComponent::UpdateFilterRecipeSlots(EStructureType type)
 	APlayerHUD* hud = Cast<APlayerHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	hud->GetStructureWidget()->RemoveSlots();
 	hud->GetStructureWidget()->SlotCreation(dataTable, unlockedStructuresData, type);
-}
-
-//Debug
-void UConstructionComponent::PrintUnlockedRecipes()
-{
-	for (FName name : unlockedStructuresData)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, name.ToString());
-
-	}
 }
 
 void UConstructionComponent::CreateStructure(TSubclassOf<AConstructionPart>& constructionPart, TMap<int, int> cost)
@@ -429,7 +417,6 @@ void UConstructionComponent::PlaceStructure()
 	if (!canContinue)
 	{
 		EndBuild();
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, TEXT("¡Sale del EndBuild!"));
 		return;
 	}
 
